@@ -17,6 +17,102 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>4.0.3</version>
+                <configuration>
+                    <url>jdbc:postgresql:postgres</url>
+                    <user>postgres</user>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <version>9.4.1209</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen-maven</artifactId>
+                <version>3.8.4</version>
+
+                <!-- The plugin should hook into the generate goal -->
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>org.postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <version>9.4.1209</version>
+                    </dependency>
+                </dependencies>
+
+                <!-- Specify the plugin configuration.
+                     The configuration format is the same as for the standalone code generator -->
+                <configuration>
+
+                    <!-- JDBC connection parameters -->
+                    <jdbc>
+                        <driver>org.postgresql.Driver</driver>
+                        <url>jdbc:postgresql:postgres</url>
+                        <user>postgres</user>
+                    </jdbc>
+
+                    <!-- Generator parameters -->
+                    <generator>
+                        <generate>
+                            <!-- Generate jOOQ Record classes for type-safe querying. You can
+                                 turn this off, if you don't need "active records" for CRUD
+                                 Defaults to true -->
+                            <records>true</records>
+
+                            <!-- Generate POJOs in addition to Record classes for usage of the
+                                 ResultQuery.fetchInto(Class) API
+                                 Defaults to false -->
+                            <pojos>false</pojos>
+
+                            <!-- Generate immutable POJOs for usage of the ResultQuery.fetchInto(Class) API
+                                 This overrides any value set in <pojos/>
+                                 Defaults to false -->
+                            <immutablePojos>false</immutablePojos>
+
+                            <!-- Generate DAOs in addition to POJO classes
+                                 Defaults to false -->
+                            <daos>false</daos>
+
+                            <!-- Annotate POJOs and Records with JSR-303 validation annotations
+                                 Defaults to false -->
+                            <validationAnnotations>true</validationAnnotations>
+
+                            <!-- Generate fluent setters in
+
+                                 - records
+                                 - pojos
+                                 - interfaces
+
+                                 Fluent setters are against the JavaBeans specification, but can be quite
+                                 useful to those users who do not depend on EL, JSP, JSF, etc.
+
+                                 Defaults to false -->
+                            <fluentSetters>false</fluentSetters>
+                        </generate>
+                        <target>
+                            <packageName>black.door.intertalk.jooq</packageName>
+                            <directory>target/generated-sources/jooq</directory>
+                        </target>
+                    </generator>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -64,6 +160,12 @@
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
             <version>1.5.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.4.1209</version>
         </dependency>
 
         <dependency>
