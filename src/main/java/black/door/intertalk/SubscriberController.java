@@ -22,13 +22,14 @@ import static black.door.intertalk.Main.mapper;
 @WebSocket
 public class SubscriberController {
 
-	public static final Map<InternetAddress, Set<Session>> SUBSCRIBERS =
+	public static final Map<String, Set<Session>> SUBSCRIBERS =
 			new ConcurrentHashMap<>();
 
-	private InternetAddress user;
+	private String user;
 
 	@OnWebSocketConnect
-	public void connected(Session session){
+	public void connected(Session session) throws IOException {
+		//session.getRemote().sendString("hello");
 	}
 
 	@OnWebSocketClose
@@ -46,7 +47,7 @@ public class SubscriberController {
 		sessions.add(session);
 	}
 
-	public static javaslang.collection.Set<Try<Void>> notifyUsers(javaslang.collection.Set<InternetAddress> users,
+	public static javaslang.collection.Set<Try<Void>> notifyUsers(javaslang.collection.Set<String> users,
 	                                                              Message message){
 		return users.flatMap(SUBSCRIBERS::get).filter(Session::isOpen).map(s ->
 			Try.run(() -> s.getRemote().sendString(mapper.writeValueAsString(message)))
