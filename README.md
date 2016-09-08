@@ -83,6 +83,10 @@ of all valid keys for this provider.
 An endpoint which returns a JWK with matching `kid` field if the provider has such a key,
 otherwise 404.
 
+### Sending messages between providers
+
+Send messages to the `/messages` endpoint of the recieving provider. Only send one message per recieving provider (regardless of how many recipeients the conversation has). So in a conversation `["alice@ecorp.com", "bob@chat.allsafe.io", "jane@ecorp.com"]`, when bob sends a message, the `chat.allsafe.io` provider should only send one message to `ecorp.com`.
+
 ### Authentication
 
 #### Server Authentication
@@ -125,3 +129,15 @@ is not done over authenticated HTTPS, the recieving provider SHOULD notify the
 user when displaying the message to them.
 
 ## Reference Implementation
+
+### Login
+
+Log in to the refrerence provider with OAuth2 password grant (`POST` to `\token`).
+
+### Sending Messages
+
+Send messages with `POST` to `\messages`. The body should be a message object like the one in the intertalk standard. Include the token from the login in your request (according to bearer token usage, in the `Authorization` header).
+
+### Recieving Messages
+
+Establish a websocket connection to `\messages`. As soon as you connect send the token from the login. New messages in the conversation will be sent to you as they arrive. All messages will come over this socket (including ones you send).
