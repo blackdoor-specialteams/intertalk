@@ -1,16 +1,12 @@
 package black.door.intertalk;
 
-import black.door.intertalk.jooq.Tables;
-import black.door.intertalk.jooq.tables.Messages;
 import black.door.intertalk.jooq.tables.records.MessagesRecord;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
-import org.slf4j.Logger;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 
 import java.sql.Connection;
 import java.sql.Timestamp;
@@ -38,15 +34,15 @@ public class MessageController {
 	public Object receiveMessage(Request req, Response res){
 		Message message = req.attribute(MESSAGE);
 
-		//boolean callerIsProvider = req.attribute(CALLER_IS_PROVIDER);
+		boolean callerIsProvider = req.attribute(CALLER_IS_PROVIDER);
 
-		//if(callerIsProvider){
+		if(callerIsProvider){
 			message = ((ImmutableMessage)message)
 					.withReceivedAt(now());
-		//}else {
-		//	message = ((ImmutableMessage)message)
-		//			.withSentAt(now());
-		//}
+		}else {
+			message = ((ImmutableMessage)message)
+					.withSentAt(now());
+		}
 
 
 		// persist message

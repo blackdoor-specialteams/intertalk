@@ -27,6 +27,8 @@ import static spark.Spark.*;
  */
 public class Main {
 
+	static String domain;
+
 	public static final ObjectMapper mapper = new ObjectMapper()
 			.registerModule(new Jdk8Module())
 			.registerModule(new JavaslangModule())
@@ -38,6 +40,8 @@ public class Main {
 		val jdbcUser = conf.getString("intertalk.db.user");
 		val jdbcPass = conf.getString("intertalk.db.password");
 		val tokenKey = MacProvider.generateKey(SignatureAlgorithm.ES512);
+		domain = conf.getString("intertalk.domain");
+		SubscriberController.tokenKey = tokenKey;
 
 		val hikari = new HikariDataSource();
 		hikari.setJdbcUrl(jdbcUrl);
@@ -45,13 +49,13 @@ public class Main {
 		hikari.setPassword(jdbcPass);
 
 		Supplier<KeyController> keyControllerSupplier = KeyController::new;
-		Supplier<AuthController> authControllerSupplier = () -> new AuthController(mapper);
+		Supplier<AuthController> authControllerSupplier = () -> new AuthController(mapper, tokenKey, domain);
 
 		webSocket("/messages", SubscriberController.class);
 		before("/messages", (req, res) -> authControllerSupplier.get().checkToken(req, res));
 		post("/messages", buildMessageController(mapper, hikari, MessageController::receiveMessage));
 
-		post("/token", (req, res) -> buildLoginController(hikari, tokenKey, LoginController::login));
+		post("/token", (req, res) -> buildLoginController(hikari, tokenKey, UserController::login));
 
 		get("/keys", keyControllerSupplier.get().listKeys);
 		get("/keys/:kid", keyControllerSupplier.get().retrieveKey);
@@ -61,14 +65,14 @@ public class Main {
 	private static Route buildLoginController(DataSource ds,
 	                                          Key tokenKey,
 	                                          Function3<
-			                                          LoginController,
+			                                          UserController,
 			                                          Request,
 			                                          Response,
 			                                          Object>
 			                                          method){
 		return (req, res) -> {
 			try(Connection connection = ds.getConnection()){
-				return method.apply(new LoginController(connection, tokenKey), req, res);
+				return method.apply(new UserController(connection, tokenKey, mapper), req, res);
 			}
 		};
 	}

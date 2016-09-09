@@ -1,14 +1,17 @@
 package black.door.intertalk;
 
+import io.jsonwebtoken.ClaimJwtException;
+import io.jsonwebtoken.Jwts;
 import javaslang.control.Try;
+import lombok.val;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
-import javax.mail.internet.InternetAddress;
 import java.io.IOException;
+import java.security.Key;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +25,7 @@ import static black.door.intertalk.Main.mapper;
 @WebSocket
 public class SubscriberController {
 
+	static Key tokenKey;
 	public static final Map<String, Set<Session>> SUBSCRIBERS =
 			new ConcurrentHashMap<>();
 
@@ -39,16 +43,29 @@ public class SubscriberController {
 
 	@OnWebSocketMessage
 	public void message(Session session, String message) throws IOException {
-		Set<Session> sessions = SUBSCRIBERS.get(user);
-		if(sessions == null) {
-			sessions = new ConcurrentSkipListSet<>();
-			SUBSCRIBERS.put(user, sessions);
+		try {
+			val claims = Jwts.parser()
+					.setSigningKey(tokenKey)
+					.parseClaimsJws(message)
+					.getBody();
+			user = claims.getSubject();
+
+			Set<Session> sessions = SUBSCRIBERS.get(user);
+			if(sessions == null) {
+				sessions = new ConcurrentSkipListSet<>();
+				val sz = SUBSCRIBERS.putIfAbsent(user, sessions);
+				if(sz != null)
+					sessions = sz;
+			}
+			sessions.add(session);
+		}catch (ClaimJwtException e){
+			session.close(4001, "bad token");
 		}
-		sessions.add(session);
 	}
 
-	public static javaslang.collection.Set<Try<Void>> notifyUsers(javaslang.collection.Set<String> users,
-	                                                              Message message){
+	public static javaslang.collection.Set<Try<Void>> notifyUsers(
+			javaslang.collection.Set<String> users,
+			Message message){
 		return users.flatMap(SUBSCRIBERS::get).filter(Session::isOpen).map(s ->
 			Try.run(() -> s.getRemote().sendString(mapper.writeValueAsString(message)))
 		);

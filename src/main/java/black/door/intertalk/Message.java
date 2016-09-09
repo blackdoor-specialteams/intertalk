@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import javaslang.collection.Set;
 import org.immutables.value.Value;
 
-import javax.mail.internet.InternetAddress;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
