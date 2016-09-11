@@ -17,6 +17,117 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.5.0</version>
+                <configuration>
+                    <mainClass>black.door.intertalk.Main</mainClass>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>4.0.3</version>
+                <configuration>
+                    <url>jdbc:postgresql://${env.INTERTALK_DB_HOST}:${INTERTALK_DB_PORT}/${INTERTALK_DB_DATABASE}</url>
+                    <user>${INTERTALK_DB_USER}</user>
+                    <password>${INTERTALK_DB_PASSWORD}</password>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <version>9.4.1209</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen-maven</artifactId>
+                <version>3.8.4</version>
+
+                <!-- The plugin should hook into the generate goal -->
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>org.postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <version>9.4.1209</version>
+                    </dependency>
+                </dependencies>
+
+                <!-- Specify the plugin configuration.
+                     The configuration format is the same as for the standalone code generator -->
+                <configuration>
+
+                    <!-- JDBC connection parameters -->
+                    <jdbc>
+                        <driver>org.postgresql.Driver</driver>
+                        <url>jdbc:postgresql://${env.INTERTALK_DB_HOST}:${INTERTALK_DB_PORT}/${INTERTALK_DB_DATABASE}</url>
+                        <user>${INTERTALK_DB_USER}</user>
+                        <password>${INTERTALK_DB_PASSWORD}</password>
+                    </jdbc>
+
+                    <!-- Generator parameters -->
+                    <generator>
+                        <database>
+                            <name>org.jooq.util.postgres.PostgresDatabase</name>
+                            <inputSchema>public</inputSchema>
+                        </database>
+                        <generate>
+                            <!-- Generate jOOQ Record classes for type-safe querying. You can
+                                 turn this off, if you don't need "active records" for CRUD
+                                 Defaults to true -->
+                            <records>true</records>
+
+                            <!-- Generate POJOs in addition to Record classes for usage of the
+                                 ResultQuery.fetchInto(Class) API
+                                 Defaults to false -->
+                            <pojos>false</pojos>
+
+                            <!-- Generate immutable POJOs for usage of the ResultQuery.fetchInto(Class) API
+                                 This overrides any value set in <pojos/>
+                                 Defaults to false -->
+                            <immutablePojos>false</immutablePojos>
+
+                            <!-- Generate DAOs in addition to POJO classes
+                                 Defaults to false -->
+                            <daos>false</daos>
+
+                            <!-- Annotate POJOs and Records with JSR-303 validation annotations
+                                 Defaults to false -->
+                            <validationAnnotations>true</validationAnnotations>
+
+                            <!-- Generate fluent setters in
+
+                                 - records
+                                 - pojos
+                                 - interfaces
+
+                                 Fluent setters are against the JavaBeans specification, but can be quite
+                                 useful to those users who do not depend on EL, JSP, JSF, etc.
+
+                                 Defaults to false -->
+                            <fluentSetters>false</fluentSetters>
+                        </generate>
+                        <target>
+                            <packageName>black.door.intertalk.jooq</packageName>
+                            <directory>target/generated-sources/jooq</directory>
+                        </target>
+                    </generator>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -26,6 +137,10 @@
             <url>https://jitpack.io</url>
         </repository>
     </repositories>
+
+    <properties>
+        <jacksonVersion>2.8.1</jacksonVersion>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -54,6 +169,11 @@
             <artifactId>javaslang</artifactId>
             <version>2.0.3</version>
         </dependency>
+        <dependency>
+            <groupId>io.javaslang</groupId>
+            <artifactId>javaslang-jackson</artifactId>
+            <version>2.0.3</version>
+        </dependency>
 
         <dependency>
             <groupId>javax.mail</groupId>
@@ -67,6 +187,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.4.1209</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.16.10</version>
@@ -74,9 +200,72 @@
         </dependency>
 
         <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>1.1.0.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+            <version>1.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jacksonVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jacksonVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jacksonVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
+            <version>${jacksonVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${jacksonVersion}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.github.kag0</groupId>
             <artifactId>oauth2</artifactId>
-            <version>1.1.1</version>
+            <version>1.1.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>2.4.7</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.21</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.6.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.55</version>
         </dependency>
 
         <dependency>
@@ -90,6 +279,20 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mashape.unirest</groupId>
+            <artifactId>unirest-java</artifactId>
+            <version>1.4.9</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>4.0.3</version>
             <scope>test</scope>
         </dependency>
 
