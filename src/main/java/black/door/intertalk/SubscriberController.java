@@ -71,7 +71,7 @@ public class SubscriberController {
 		return users/*todo filter out other providers, map mail address to local part*/
 				.filter(u -> u.split("@")[1].equalsIgnoreCase(Main.domain))
 				.map(u -> u.split("@")[0])
-				.flatMap(SUBSCRIBERS::get)
+				.flatMap(h -> SUBSCRIBERS.getOrDefault(h, new HashSet<>()))
 				.filter(s -> s != null)
 				.filter(Session::isOpen).map(s ->
 			Try.run(() -> s.getRemote().sendString(mapper.writeValueAsString(message)))
