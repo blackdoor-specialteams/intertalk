@@ -5,16 +5,16 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.typesafe.config.ConfigFactory;
 import com.zaxxer.hikari.HikariDataSource;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.crypto.MacProvider;
 import javaslang.Function3;
 import javaslang.jackson.datatype.JavaslangModule;
 import lombok.val;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
-import javax.mail.internet.AddressException;
 import javax.sql.DataSource;
 import java.security.Key;
 import java.sql.Connection;
@@ -28,22 +28,26 @@ import static spark.Spark.*;
 public class Main {
 
 	static String domain;
+	static HikariDataSource hikari;
 
 	public static final ObjectMapper mapper = new ObjectMapper()
 			.registerModule(new Jdk8Module())
 			.registerModule(new JavaslangModule())
 			.registerModule(new JavaTimeModule());
 
-	public static void main(String[] args) throws AddressException {
+	public static void main(String[] args){
+		Logger logger = LoggerFactory.getLogger(black.door.intertalk.Main.class);
 		val conf = ConfigFactory.load();
 		val jdbcUrl = conf.getString("intertalk.db.jdbc");
 		val jdbcUser = conf.getString("intertalk.db.user");
 		val jdbcPass = conf.getString("intertalk.db.password");
-		val tokenKey = MacProvider.generateKey(SignatureAlgorithm.ES512);
+		val tokenKey = MacProvider.generateKey();
 		domain = conf.getString("intertalk.domain");
 		SubscriberController.tokenKey = tokenKey;
 
-		val hikari = new HikariDataSource();
+		logger.info("Starting server for domain " + domain + " with database at " + jdbcUrl);
+
+		hikari = new HikariDataSource();
 		hikari.setJdbcUrl(jdbcUrl);
 		hikari.setUsername(jdbcUser);
 		hikari.setPassword(jdbcPass);
@@ -55,10 +59,17 @@ public class Main {
 		before("/messages", (req, res) -> authControllerSupplier.get().checkToken(req, res));
 		post("/messages", buildMessageController(mapper, hikari, MessageController::receiveMessage));
 
-		post("/token", (req, res) -> buildLoginController(hikari, tokenKey, UserController::login));
+		post("/users", buildLoginController(hikari, tokenKey, UserController::createUser));
+
+		post("/token", buildLoginController(hikari, tokenKey, UserController::login));
 
 		get("/keys", keyControllerSupplier.get().listKeys);
 		get("/keys/:kid", keyControllerSupplier.get().retrieveKey);
+
+		exception(RuntimeException.class, (exception, request, response) -> {
+			logger.error("exception in controller", exception);
+			response.status(500);
+		});
 
 	}
 

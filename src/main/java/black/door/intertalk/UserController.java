@@ -2,8 +2,8 @@ package black.door.intertalk;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.kag0.oauth2.*;
-import io.github.kag0.oauth2.password.PasswordTokenRequest;
+import com.github.kag0.oauth2.*;
+import com.github.kag0.oauth2.password.PasswordTokenRequest;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import javaslang.control.Try;
@@ -26,6 +26,9 @@ import java.util.Date;
 import java.util.Optional;
 
 import static black.door.intertalk.jooq.Tables.USERS;
+import static javaslang.API.*;
+import static javaslang.Patterns.Failure;
+import static javaslang.Patterns.Success;
 
 /**
  * Created by nfischer on 9/6/2016.
@@ -52,6 +55,7 @@ public class UserController {
 		byte[] salt = new byte[16];
 		new SecureRandom().nextBytes(salt);
 		User user = new User();
+		user.salt = salt;
 		user.handle = newUser.username();
 		val buf = StandardCharsets.UTF_8.encode(CharBuffer.wrap(newUser.password()));
 		val pw = new byte[buf.limit()];
@@ -61,21 +65,35 @@ public class UserController {
 		buf.put(new byte[pw.length]);
 		Arrays.fill(newUser.password(), (char)0);
 
-		res.status(201);
-		return "created";
+		Try<Integer> insert = Try.of(() -> create.newRecord(USERS, user).insert());
+
+		return Match(insert).of(
+			Case(Success($()), () -> {
+				res.status(201);
+				return "created";
+			}),
+			Case(Failure($()), () -> {
+				res.status(400);
+				return "user already exists";
+			})
+		);
+
 	}
+
+
 
 	public JsonNode login(Request req, Response res){
 		Optional<? extends TokenRequest> tokenRequestOption =
 				TokenRequest.parseEncoded(req.body());
 		final Optional<User> userOption;
 
-
-		if(!tokenRequestOption.isPresent() || !(tokenRequestOption.get() instanceof TokenRequest)){
+		if(!(tokenRequestOption.map(r -> r instanceof PasswordTokenRequest).orElse(false))){
+			System.out.println(tokenRequestOption.get());
 			return ImmutableErrorResponse
 					.of(ErrorType.StdErrorType.invalid_request)
 					.toJson();
 		}
+
 
 		val request = (PasswordTokenRequest) tokenRequestOption.get();
 		userOption = create.select()

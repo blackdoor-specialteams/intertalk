@@ -2,7 +2,6 @@ package black.door.intertalk;
 
 import black.door.intertalk.jooq.tables.records.MessagesRecord;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.val;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import spark.Request;
@@ -36,32 +35,28 @@ public class MessageController {
 
 		boolean callerIsProvider = req.attribute(CALLER_IS_PROVIDER);
 
-		if(callerIsProvider){
-			message = ((ImmutableMessage)message)
-					.withReceivedAt(now());
-		}else {
+		if(!callerIsProvider){
 			message = ((ImmutableMessage)message)
 					.withSentAt(now());
 		}
 
+		message = ((ImmutableMessage)message)
+				.withReceivedAt(now());
 
 		// persist message
-		val finalMessage = message;
-		create.transaction(configuration -> {
-			MessagesRecord record = new MessagesRecord(); // todo bind record mapper
-			record.setTo(finalMessage.to().toString()); // todo sort first
-			record.setFrom(finalMessage.from());
-			record.setSentAt(Timestamp.from(finalMessage.sentAt().toInstant()));
-			record.setReceivedAt(Timestamp.from(finalMessage.receivedAt().get().toInstant()));
-			record.setMessage(finalMessage.message());
-			finalMessage.messageFormatted().ifPresent(record::setMessageFormatted);
-			finalMessage.format().ifPresent(record::setFormat);
 
-			DSL.using(configuration)
-					.executeInsert(record);
-					//.newRecord(Tables.MESSAGES, finalMessage)
-					//.store();
-		});
+
+			MessagesRecord record = new MessagesRecord(); // todo bind record mapper
+			record.setTo(message.to().toString()); // todo sort first
+			record.setFrom(message.from());
+			record.setSentAt(Timestamp.from(message.sentAt().toInstant()));
+			record.setReceivedAt(Timestamp.from(message.receivedAt().get().toInstant()));
+			record.setMessage(message.message());
+		message.messageFormatted().ifPresent(record::setMessageFormatted);
+		message.format().ifPresent(record::setFormat);
+
+			create.executeInsert(record);
+
 
 		SubscriberController.notifyUsers(message.to(), message);
 

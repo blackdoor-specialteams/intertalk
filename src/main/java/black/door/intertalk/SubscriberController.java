@@ -66,7 +66,12 @@ public class SubscriberController {
 	public static javaslang.collection.Set<Try<Void>> notifyUsers(
 			javaslang.collection.Set<String> users,
 			Message message){
-		return users.flatMap(SUBSCRIBERS::get).filter(Session::isOpen).map(s ->
+		return users/*todo filter out other providers, map mail address to local part*/
+				.filter(u -> u.split("@")[1].equalsIgnoreCase(Main.domain))
+				.map(u -> u.split("@")[0])
+				.flatMap(SUBSCRIBERS::get)
+				.filter(s -> s != null)
+				.filter(Session::isOpen).map(s ->
 			Try.run(() -> s.getRemote().sendString(mapper.writeValueAsString(message)))
 		);
 	}

@@ -30,34 +30,37 @@ public class AuthController {
 	public void checkToken(Request req, Response res){
 		val authzHeader = req.headers("Authorization");
 		val token = authzHeader.replaceFirst("Bearer ", "");
-
-		val jwt = Jwts.parser()
-				.setSigningKeyResolver(new SigningKeyResolverAdapter() {
-					public Key resolveSigningKey(JwsHeader header, Claims claims) {
-						val alg = SignatureAlgorithm.forName(header.getAlgorithm());
-						val kid = header.getKeyId();
-						if("intertalk ref".equals(kid)) {
-							req.attribute(CALLER_IS_PROVIDER, false);
-							return tokenKey;
+		try {
+			val jwt = Jwts.parser()
+					.setSigningKeyResolver(new SigningKeyResolverAdapter() {
+						public Key resolveSigningKey(JwsHeader header, Claims claims) {
+							val alg = SignatureAlgorithm.forName(header.getAlgorithm());
+							val kid = header.getKeyId();
+							if ("intertalk ref".equals(kid)) {
+								req.attribute(CALLER_IS_PROVIDER, false);
+								return tokenKey;
+							}
+							throw new JwtException("can't find key");
 						}
-						throw new JwtException("can't find key");
-					}
-				})
-				// we must be the audience
-				.parseClaimsJws(token);
-		val claims = jwt.getBody();
+					})
+					// we must be the audience
+					.parseClaimsJws(token);
+			val claims = jwt.getBody();
 
-		val tryMessage = Try.of(() -> mapper.readValue(req.bodyAsBytes(), Message.class));
-		val message = tryMessage.get();
+			val tryMessage = Try.of(() -> mapper.readValue(req.bodyAsBytes(), Message.class));
+			val message = tryMessage.get();
 
-		if(req.attribute(CALLER_IS_PROVIDER)){
-			// sender domain must be iss
-			// sender must be sub
-		}else{ // caller is user
-			if(!message.from().equalsIgnoreCase(claims.getSubject()+ '@' + domain))
-				halt(403, "You can only send messages as yourself ("+claims.getSubject()+")");
+			if (req.attribute(CALLER_IS_PROVIDER)) {
+				// sender domain must be iss
+				// sender must be sub
+			} else { // caller is user
+				if (!message.from().equalsIgnoreCase(claims.getSubject() + '@' + domain))
+					halt(403, "You can only send messages as yourself (" + claims.getSubject() + ")");
+			}
+
+			req.attribute(MessageController.MESSAGE, message);
+		}catch (JwtException e){
+			halt(401);
 		}
-
-		req.attribute(MessageController.MESSAGE, message);
 	}
 }
