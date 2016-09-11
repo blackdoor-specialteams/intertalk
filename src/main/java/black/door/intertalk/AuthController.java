@@ -8,6 +8,7 @@ import spark.Request;
 import spark.Response;
 
 import java.security.Key;
+import java.util.Optional;
 
 import static spark.Spark.halt;
 
@@ -28,8 +29,13 @@ public class AuthController {
 	}
 
 	public void checkToken(Request req, Response res){
-		val authzHeader = req.headers("Authorization");
-		val token = authzHeader.replaceFirst("Bearer ", "");
+		val tokenOption = Optional.ofNullable(req.headers("Authorization"))
+				.map(authzHeader -> authzHeader.replaceFirst("Bearer ", ""));
+		if(!tokenOption.isPresent()){
+			halt(401, "log in");
+		}
+
+		val token = tokenOption.get();
 		try {
 			val jwt = Jwts.parser()
 					.setSigningKeyResolver(new SigningKeyResolverAdapter() {
@@ -53,9 +59,12 @@ public class AuthController {
 			if (req.attribute(CALLER_IS_PROVIDER)) {
 				// sender domain must be iss
 				// sender must be sub
+				halt(501, "intertalk provider sending not yet supported");
 			} else { // caller is user
 				if (!message.from().equalsIgnoreCase(claims.getSubject() + '@' + domain))
 					halt(403, "You can only send messages as yourself (" + claims.getSubject() + ")");
+				if(! message.to().contains(claims.getSubject() + '@' + domain))
+					halt(403, "You can't send messages to conversations you aren't in");
 			}
 
 			req.attribute(MessageController.MESSAGE, message);

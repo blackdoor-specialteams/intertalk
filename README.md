@@ -140,4 +140,4 @@ Send messages with `POST` to `\messages`. The body should be a message object li
 
 ### Recieving Messages
 
-Establish a websocket connection to `\messages`. As soon as you connect send the token from the login. New messages in the conversation will be sent to you as they arrive. All messages will come over this socket (including ones you send).
+Establish a websocket connection to `\messageStream`. As soon as you connect send the token from the login. New messages in the conversation will be sent to you as they arrive. All messages will come over this socket (including ones you send).

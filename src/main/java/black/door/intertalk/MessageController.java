@@ -45,7 +45,6 @@ public class MessageController {
 
 		// persist message
 
-
 			MessagesRecord record = new MessagesRecord(); // todo bind record mapper
 			record.setTo(message.to().toString()); // todo sort first
 			record.setFrom(message.from());

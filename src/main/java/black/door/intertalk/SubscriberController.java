@@ -12,6 +12,8 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
 import java.io.IOException;
 import java.security.Key;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,7 +54,7 @@ public class SubscriberController {
 
 			Set<Session> sessions = SUBSCRIBERS.get(user);
 			if(sessions == null) {
-				sessions = new ConcurrentSkipListSet<>();
+				sessions = Collections.synchronizedSet(new HashSet<>());
 				val sz = SUBSCRIBERS.putIfAbsent(user, sessions);
 				if(sz != null)
 					sessions = sz;
