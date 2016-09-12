@@ -1,4 +1,4 @@
-var URL = "csubj.io"
+var URL = "https://csubj.io"
 var port = "4567";
 
 var curUser = {
