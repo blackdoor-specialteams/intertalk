@@ -14,11 +14,34 @@ function initPage()
         submitMessage();
     });
 
+    $("#message-text").keypress(function(evt)
+    {
+        if(evt.which == 13)
+        {
+            var txt = $("#message-text");
+
+            if(evt.shiftKey)
+            {
+                var curHeight = txt.height();
+                txt.css("height", (curHeight + 16).toString() + "px");
+                $("#message-box").css("height", (curHeight + 24).toString() + "px");
+            }
+            else
+            {
+                evt.preventDefault();
+                txt.css("height", "16px");
+                $("#message-box").css("height", "24px");
+                //submit the message now
+                submitMessage();
+            }
+        }
+    });
+
     var package = {
         username: "yacklebeam",
         password: "password"
     };
-    $.post("https://" + URL + ":" + port + '/users/', package);
+    //$.post("https://" + URL + ":" + port + '/users/', package);
 
     // connect the websocket connection for messages?
     curUser.userid = "yacklebeam";
@@ -28,7 +51,7 @@ function initPage()
     //load dummy messages
     for(i = 0; i < 120; ++i)
     {
-        addChatMessage("test-johnsmith", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc eget rutrum tellus. Etiam tempor, justo ac fermentum sodales, dolor felis condimentum ligula, vel molestie lacus nibh non magna.");
+        addChatMessage("test-johnsmiths", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc eget rutrum tellus. Etiam tempor, justo ac fermentum sodales, dolor felis condimentum ligula, vel molestie lacus nibh non magna.");
     }
 }
 
@@ -68,15 +91,15 @@ function getToIDs()
 
 function submitMessage()
 {
-    var msg = $("#message-line").val();
+    var msg = $("#message-text").val();
     if(msg.trim() == "") 
     {   
-        $("#message-line").val("")
+        $("#message-text").val("")
         return false;
     }
     else
     {
-        $("#message-line").val("")
+        $("#message-text").val("")
         //send the message to the provider
         var curDate = new Date();
         var curDateTime = curDate.toISOString();

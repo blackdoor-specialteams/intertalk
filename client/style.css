@@ -1,13 +1,30 @@
 body {
     background-color: #0f0f0f;
+    display: flex;
 }
 
 p {
     color: #b48c64;
 }
 
+#chat-tabs {
+    padding-top: 10px;
+    margin-top: 20px;
+    margin-left: 20px;
+    height: 600px;
+    width: 100px;
+    border: 2px solid #b48c64;
+    flex-flow: 1;
+}
+
+#chat-main {
+    margin-top: 20px;
+    margin-left: 6px;
+    flex-flow: 1;
+}
+
 #chat-box {
-    margin: 20px;
+    margin-bottom:20px;
     width: 800px;
     height: 600px;
 }
@@ -23,46 +40,25 @@ p {
 
 #message-box {
     width: 800px;
-    height: 25px;
+    height: 24px;
     display: flex;
     margin-bottom: 20px;
-    margin-left: 20px;
     border: 2px solid #b48c64;
     background-color: #0f0f0f;
 }
 
-#submit-form
-{
-    background-color: #0f0f0f;
+#message-text {
+    width: 800px;
+    height: 16px;
     color: #b48c64;
-    padding-left: 5px;
-    margin:0;
-    border: none;
-    outline: none;
-    flex-grow: 1;
-}
-
-#message-line {
     background-color: #0f0f0f;
-    color: #b48c64;
-    padding: 0px;
-    width: 100%;
-    height: 100%;
-    margin:0;
     border: none;
+    margin: 2px;
+    resize: none;
+}
+
+#message-text:focus {
     outline: none;
-}
-
-#message-line:focus {
-    outline:none;
-}
-
-#submit-message {
-    flex-grow: 1;
-    min-width: 100px;
-    max-width: 100px;
-    background-color: #b48c64;
-    text-align: center;
 }
 
 .chat-message {
@@ -87,27 +83,29 @@ p {
     flex-grow: 1;
 }
 
-::-webkit-scrollbar {
+div::-webkit-scrollbar {
     width:12px;
     background-color:#0f0f0f;
 }
 
-::-webkit-scrollbar:hover {
-    background-color:#333333;
+div::-webkit-scrollbar:hover {
 }
 
-::-webkit-scrollbar-thumb {
+div::-webkit-scrollbar-thumb {
     background-color:#b48c64;
+    border: 2px #0f0f0f solid;
 }
 
-::-webkit-scrollbar-thumb:hover {
+div::-webkit-scrollbar-thumb:hover {
     background-color:#b48c64;
+    border: 2px #0f0f0f solid;
 }
 
-::-webkit-scrollbar-thumb:active {
+div::-webkit-scrollbar-thumb:active {
     background-color:#8a6642;
+    border: 2px #0f0f0f solid;
 }
 
-::-webkit-scrollbar-track {
+div::-webkit-scrollbar-track {
     border:none;
 } 
