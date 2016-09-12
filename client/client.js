@@ -1,4 +1,4 @@
-var URL = "https://csubj.io"
+var URL = "csubj.io"
 var port = "4567";
 
 var curUser = {
@@ -18,7 +18,7 @@ function initPage()
         username: "yacklebeam",
         password: "password"
     };
-    $.post(URL + ":" + port + '/users', package);
+    $.post("https://" + URL + ":" + port + '/users', package);
 
     // connect the websocket connection for messages?
     curUser.userid = "yacklebeam";
@@ -33,7 +33,7 @@ function loginToProvider()
         username: curUser.userid + "@" + URL,
         password: curUser.passwd
     };
-    $.post(URL + ":" + port + '/token', package, function(data) {
+    $.post("https://" + URL + ":" + port + '/token', package, function(data) {
         //do something with that login shit
         curUser.token = data.access_token;
     });
@@ -84,7 +84,7 @@ function submitMessage()
         };
 
         $.ajax({
-            url: URL + ":" + port + "/messages",
+            url: "https://" + URL + ":" + port + "/messages",
             type: "POST",
             data: package,
             headers: {
