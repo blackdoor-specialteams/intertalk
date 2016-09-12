@@ -2,7 +2,6 @@ package black.door.intertalk;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kag0.oauth2.TokenResponse;
-import com.github.kag0.oauth2.TokenType;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;

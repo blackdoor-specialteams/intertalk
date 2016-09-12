@@ -55,6 +55,9 @@ public class Main {
 		Supplier<KeyController> keyControllerSupplier = KeyController::new;
 		Supplier<AuthController> authControllerSupplier = () -> new AuthController(mapper, tokenKey, domain);
 
+		if(conf.hasPath("intertalk.keystore.password"))
+			secure("keystore.jks", conf.getString("intertalk.keystore.password"), null, null);
+
 		webSocket("/messageStream", SubscriberController.class);
 		before("/messages", (req, res) -> authControllerSupplier.get().checkToken(req, res));
 		post("/messages", buildMessageController(mapper, hikari, MessageController::receiveMessage));
@@ -66,11 +69,17 @@ public class Main {
 		get("/keys", keyControllerSupplier.get().listKeys);
 		get("/keys/:kid", keyControllerSupplier.get().retrieveKey);
 
+		get("/hello", (q, r) -> "hello");
+
 		enableCORS("*", "POST, GET, OPTIONS", "*");
+
 		exception(RuntimeException.class, (exception, request, response) -> {
 			logger.error("exception in controller", exception);
 			response.status(500);
+			response.body("0opz");
 		});
+
+
 
 	}
 
