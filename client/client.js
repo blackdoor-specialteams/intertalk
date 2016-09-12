@@ -23,7 +23,13 @@ function initPage()
     // connect the websocket connection for messages?
     curUser.userid = "yacklebeam";
     curUser.passwd = "password"
-    loginToProvider();
+    //loginToProvider();
+
+    //load dummy messages
+    for(i = 0; i < 120; ++i)
+    {
+        addChatMessage("test-johnsmith", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc eget rutrum tellus. Etiam tempor, justo ac fermentum sodales, dolor felis condimentum ligula, vel molestie lacus nibh non magna.");
+    }
 }
 
 function loginToProvider()
