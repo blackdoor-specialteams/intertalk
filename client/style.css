@@ -1,17 +1,18 @@
 body {
     background-color: #0f0f0f;
-    display: flex;
 }
 
 p {
     color: #b48c64;
 }
 
+#chat-client {
+    display: flex;
+}
+
 #chat-tabs {
-    padding-top: 10px;
     margin-top: 20px;
     margin-left: 20px;
-    height: 600px;
     width: 100px;
     border: 2px solid #b48c64;
     flex-flow: 1;
@@ -24,17 +25,25 @@ p {
 }
 
 #chat-box {
-    margin-bottom:20px;
+    border: 2px solid #b48c64;
+    margin-bottom:6px;
     width: 800px;
-    height: 600px;
+}
+
+#chat-title {
+    height: 1.0em;
+    padding: 4px;
+    padding-top: 2px;
+    text-align: left;
+    background-color: #b48c64;
+    color: #0f0f0f;
 }
 
 #chat-window {
     padding-top: 10px;
     background-color: #0f0f0f;
-    border: 2px solid #b48c64;
     overflow-y: auto;
-    height: 100%;
+    height: 600px;
     width: 100%;
 }
 
@@ -42,7 +51,6 @@ p {
     width: 800px;
     height: 24px;
     display: flex;
-    margin-bottom: 20px;
     border: 2px solid #b48c64;
     background-color: #0f0f0f;
 }
@@ -81,6 +89,15 @@ p {
 .message {
     max-width: 650px;
     flex-grow: 1;
+}
+
+.chat-tab, .chat-tab-title {
+    height: 1.0em;
+    padding: 4px;
+    padding-top: 2px;
+    text-align: left;
+    color: #b48c64;
+    background-color: #0f0f0f;
 }
 
 div::-webkit-scrollbar {

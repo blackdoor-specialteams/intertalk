@@ -9,9 +9,14 @@ var curUser = {
 
 function initPage()
 {
-    $("#submit-form").submit(function(e) {
-        e.preventDefault();
-        submitMessage();
+    $(".chat-tab").click(function () {
+        $("#chat-tabs").children().each(function() {
+            $(this).css("backgroundColor", "#0f0f0f");
+            $(this).css("color", "#b48c64");
+        });
+
+        $(this).css("backgroundColor", "#b48c64");
+        $(this).css("color", "#0f0f0f");
     });
 
     $("#message-text").keypress(function(evt)
@@ -41,18 +46,18 @@ function initPage()
         username: "yacklebeam",
         password: "password"
     };
-    //$.post("https://" + URL + ":" + port + '/users/', package);
+    $.post("https://" + URL + ":" + port + '/users/', package);
 
     // connect the websocket connection for messages?
     curUser.userid = "yacklebeam";
     curUser.passwd = "password"
-    //loginToProvider();
+    loginToProvider();
 
     //load dummy messages
-    for(i = 0; i < 120; ++i)
+    /*for(i = 0; i < 120; ++i)
     {
         addChatMessage("test-johnsmiths", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc eget rutrum tellus. Etiam tempor, justo ac fermentum sodales, dolor felis condimentum ligula, vel molestie lacus nibh non magna.");
-    }
+    }*/
 }
 
 function loginToProvider()
