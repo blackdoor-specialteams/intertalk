@@ -18,7 +18,7 @@ function initPage()
         username: "yacklebeam",
         password: "password"
     };
-    $.post("https://" + URL + ":" + port + '/users', package);
+    $.post("https://" + URL + ":" + port + '/users/', package);
 
     // connect the websocket connection for messages?
     curUser.userid = "yacklebeam";
@@ -33,12 +33,12 @@ function loginToProvider()
         username: curUser.userid + "@" + URL,
         password: curUser.passwd
     };
-    $.post("https://" + URL + ":" + port + '/token', package, function(data) {
+    $.post("https://" + URL + ":" + port + '/token/', package, function(data) {
         //do something with that login shit
         curUser.token = data.access_token;
     });
 
-    var messageSocket = new WebSocket("wss://"+ URL + ":" + port + "/messages");
+    var messageSocket = new WebSocket("wss://"+ URL + ":" + port + "/messages/");
     messageSocket.onmessage = recieveMessage(event);
 
 }
@@ -84,7 +84,7 @@ function submitMessage()
         };
 
         $.ajax({
-            url: "https://" + URL + ":" + port + "/messages",
+            url: "https://" + URL + ":" + port + "/messages/",
             type: "POST",
             data: package,
             headers: {
@@ -97,9 +97,15 @@ function submitMessage()
 
 function recieveMessage(event)
 {
-    var decoded = JSON.parse(event.data);
+    try {
+        var decoded = JSON.parse(event.data);
+        addChatMessage(decoded.from, decoded.message);    
 
-    addChatMessage(decoded.from, decoded.message);    
+    }
+    catch(err) {
+        
+    }
+
 }
 
 $(document).ready(initPage);
