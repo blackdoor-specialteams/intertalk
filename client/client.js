@@ -38,7 +38,7 @@ function loginToProvider()
         curUser.token = data.access_token;
     });
 
-    var messageSocket = new WebSocket("ws://"+ URL + ":" + port + "/messages");
+    var messageSocket = new WebSocket("wss://"+ URL + ":" + port + "/messages");
     messageSocket.onmessage = recieveMessage(event);
 
 }
@@ -57,7 +57,7 @@ function addChatMessage(sender, msg)
 
 function getToIDs()
 {
-    return [curUserID];
+    return [curUser.userid + "@" + URL,];
 }
 
 function submitMessage()
@@ -76,7 +76,7 @@ function submitMessage()
         var curDateTime = curDate.toISOString();
         var package = {
             to: getToIDs(),
-            from: curUserID,
+            from: curUser.userid + "@" + URL,
             sentAt: curDateTime,
             message: msg,
             messageFormatted: msg,
