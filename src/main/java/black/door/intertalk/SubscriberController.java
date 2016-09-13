@@ -65,11 +65,11 @@ public class SubscriberController {
 	}
 
 	public static javaslang.collection.Set<Try<Void>> notifyUsers(
-			javaslang.collection.Set<String> users,
+			javaslang.collection.Set<MailAddress> users,
 			Message message){
 		return users/*todo filter out other providers, map mail address to local part*/
-				.filter(u -> u.split("@")[1].equalsIgnoreCase(Main.domain))
-				.map(u -> u.split("@")[0])
+				.filter(u -> u.domain.equalsIgnoreCase(Main.domain))
+				.map(u -> u.local)
 				.flatMap(h -> SUBSCRIBERS.getOrDefault(h, new HashSet<>()))
 				.filter(s -> s != null)
 				.filter(Session::isOpen).map(s ->

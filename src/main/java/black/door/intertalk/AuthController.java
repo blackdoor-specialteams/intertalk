@@ -7,6 +7,7 @@ import lombok.val;
 import spark.Request;
 import spark.Response;
 
+import javax.mail.internet.AddressException;
 import java.security.Key;
 import java.util.Optional;
 
@@ -28,7 +29,7 @@ public class AuthController {
 		this.domain = domain;
 	}
 
-	public void checkToken(Request req, Response res){
+	public void checkToken(Request req, Response res) throws AddressException {
 		val tokenOption = Optional.ofNullable(req.headers("Authorization"))
 				.map(authzHeader -> authzHeader.replaceFirst("Bearer ", ""));
 		if(!tokenOption.isPresent()){
@@ -61,9 +62,9 @@ public class AuthController {
 				// sender must be sub
 				halt(501, "intertalk provider sending not yet supported");
 			} else { // caller is user
-				if (!message.from().equalsIgnoreCase(claims.getSubject() + '@' + domain))
+				if (!message.from().equals(new MailAddress(claims.getSubject(), domain)))
 					halt(403, "You can only send messages as yourself (" + claims.getSubject() + ")");
-				if(! message.to().contains(claims.getSubject() + '@' + domain))
+				if(! message.to().contains(new MailAddress(claims.getSubject(), domain)))
 					halt(403, "You can't send messages to conversations you aren't in");
 			}
 
