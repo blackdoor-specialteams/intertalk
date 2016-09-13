@@ -80,6 +80,14 @@ function initPage()
         
     });
 
+    $("#newChatForm").submit(function(e) {
+        e.preventDefault();
+        var toListAsString = $("#newChatUsers").val();
+        curChannel.toList = toListAsString.split(",");
+        curChannel.toList.push(curUser.user + "@" + curUser.domain);
+        $("#chat-title span").text("[" + curChannel.toList.toString() + "]");
+    });
+
     $("#createForm").submit(function(e) {
         e.preventDefault();
         var fullUsername = $("#createUser").val();
