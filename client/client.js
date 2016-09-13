@@ -118,7 +118,14 @@ function initPage()
                username: userName,
                password: password
             };
-            $.post("https://" + connectURL + ":4567/users/", package);
+            //$.post("https://" + connectURL + ":4567/users/", package);
+            $.ajax({
+                url: "https://" + connectURL + ":4567/users/",
+                type: "POST",
+                data:package,
+                contentType:"application/json; charset=utf-8",
+                dataType:'json'
+            });
         }
         else
         {
