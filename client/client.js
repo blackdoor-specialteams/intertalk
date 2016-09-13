@@ -119,6 +119,7 @@ function initPage()
                password: password
             };
             //$.post("https://" + connectURL + ":4567/users/", package);
+            $.support.cors = true;
             $.ajax({
                 url: "https://" + connectURL + ":4567/users/",
                 type: "POST",
