@@ -124,8 +124,7 @@ function initPage()
                 url: "https://" + connectURL + ":4567/users/",
                 type: "POST",
                 data:package,
-                contentType:"application/json; charset=utf-8",
-                dataType:'json'
+                contentType:"text/plain; charset=utf-8",
             });
         }
         else
