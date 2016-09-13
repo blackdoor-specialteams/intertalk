@@ -1,10 +1,14 @@
-var URL = "csubj.io"
-var port = "4567";
-
 var curUser = {
-    userid: "yacklebeam",
-    passwd: "password",
-    token: ""
+    user: "",
+    pass: "",
+    token: "",
+    domain: ""
+};
+
+var chatTabList = [];
+
+var curChannel = {
+    toList: [],
 };
 
 function initPage()
@@ -16,10 +20,143 @@ function initPage()
         });
 
         $(this).css("backgroundColor", "#b48c64");
+        //$(this).css("backgroundColor", "#B46D64");
         $(this).css("color", "#0f0f0f");
     });
 
-    $("#message-text").keypress(function(evt)
+    $("#hide-left-sidebar").click(function() {
+        $("#left-sidebar").css("display", "none");
+        $("#hidden-left-sidebar").css("display", "block");
+    });
+
+    $("#hidden-left-sidebar").click(function() {
+        $("#left-sidebar").css("display", "flex");
+        $("#hidden-left-sidebar").css("display", "none");
+    });
+
+    $("#connect-button").click(function() {
+        var curView = $("#input-box-connect").css("display");
+        if(curView == "inline-block") {
+            $("#connect-button").css("backgroundColor", "#b48c64");
+            $("#input-box-connect").css("display", "none");
+        }
+        if(curView == "none") {
+            $("#connect-button").css("backgroundColor", "#B46D64");
+            $("#input-box-connect").css("display", "inline-block");
+            
+            $("#new-chat-button").css("backgroundColor", "#b48c64");
+            $("#input-box-new-chat").css("display", "none");
+        }
+    });
+
+    $("#new-chat-button").click(function() {
+        var curView = $("#input-box-new-chat").css("display");
+        if(curView == "inline-block") {
+            $("#new-chat-button").css("backgroundColor", "#b48c64");
+            $("#input-box-new-chat").css("display", "none");
+        }
+        if(curView == "none") {
+            $("#new-chat-button").css("backgroundColor", "#B46D64");
+            $("#input-box-new-chat").css("display", "inline-block");
+            
+            $("#connect-button").css("backgroundColor", "#b48c64");
+            $("#input-box-connect").css("display", "none");        
+        }
+    });
+
+    $("#create-button").click(function() {
+        var curView = $("#input-box-create").css("display");
+        if(curView == "inline-block") {
+            $("#create-button").css("backgroundColor", "#b48c64");
+            $("#input-box-create").css("display", "none");
+        }
+        if(curView == "none") {
+            $("#create-button").css("backgroundColor", "#B46D64");
+            $("#input-box-create").css("display", "inline-block");       
+        }
+    });
+
+    $("#disconnect-button").click(function() {
+        
+    });
+
+    $("#createForm").submit(function(e) {
+        e.preventDefault();
+        var fullUsername = $("#createUser").val();
+        var password = $("#createPass").val();
+        //is this safe????
+
+        if(fullUsername == "" || password == "")
+        {
+            $("#createUser").val("");
+            $("#createPass").val("");
+            return;
+        }        
+
+        var indexOfAt = fullUsername.indexOf("@");
+        if(indexOfAt > 0)
+        {
+            var userName = fullUsername.substring(0, indexOfAt);
+            var connectURL = fullUsername.substring(indexOfAt + 1);
+
+            $("#createUser").val("");
+            $("#createPass").val("");
+
+            $("#connect-button").css("backgroundColor", "#b48c64");
+            $("#input-box-connect").css("display", "none");
+
+            //create user
+            var package = {
+               username: userName,
+               password: password
+            };
+            $.post("https://" + connectURL + ":4567/users/", package);
+        }
+        else
+        {
+            $("#createUser").val("TRY <username>@<provider domain>");
+            $("#createPass").val("");
+        }
+    });
+
+    $("#connectForm").submit(function(e){
+        e.preventDefault();
+        var fullUsername = $("#connectUser").val();
+        var password = $("#connectPass").val();
+        //is this safe????
+
+        if(fullUsername == "" || password == "")
+        {
+            $("#connectUser").val("");
+            $("#connectPass").val("");
+            return;
+        }        
+
+        var indexOfAt = fullUsername.indexOf("@");
+        if(indexOfAt > 0)
+        {
+            var userName = fullUsername.substring(0, indexOfAt);
+            var connectURL = fullUsername.substring(indexOfAt + 1);
+
+            $("#connectUser").val("");
+            $("#connectPass").val("");
+
+            $("#connect-button").css("backgroundColor", "#b48c64");
+            $("#input-box-connect").css("display", "none");
+
+            //connect
+            loginToProvider(userName, password, connectURL);
+
+            $("#chat-title span").text("connected, no chat opened");
+        }
+        else
+        {
+            $("#connectUser").val("TRY <username>@<provider domain>");
+            $("#connectPass").val("");
+        }
+    });
+
+    $("#message-text").keydown(function(evt)
     {
         if(evt.which == 13)
         {
@@ -28,8 +165,8 @@ function initPage()
             if(evt.shiftKey)
             {
                 var curHeight = txt.height();
-                txt.css("height", (curHeight + 16).toString() + "px");
-                $("#message-box").css("height", (curHeight + 24).toString() + "px");
+                txt.css("height", (curHeight + 15).toString() + "px");
+                $("#message-box").css("height", (curHeight + 23).toString() + "px");
             }
             else
             {
@@ -40,18 +177,23 @@ function initPage()
                 submitMessage();
             }
         }
+        else if(evt.which == 8)
+        {
+            var txt = $("#message-text").val();
+            var count = (txt.match(/\n/g) || []).length;
+        }
     });
 
-    var package = {
-        username: "yacklebeam",
-        password: "password"
-    };
-    $.post("https://" + URL + ":" + port + '/users/', package);
+    //var package = {
+    //    username: "yacklebeam",
+    //    password: "password"
+    //};
+    //$.post("https://" + URL + ":" + port + '/users/', package);
 
     // connect the websocket connection for messages?
-    curUser.userid = "yacklebeam";
-    curUser.passwd = "password"
-    loginToProvider();
+    //curUser.userid = "yacklebeam";
+    //curUser.passwd = "password"
+    //loginToProvider();
 
     //load dummy messages
     /*for(i = 0; i < 120; ++i)
@@ -60,19 +202,39 @@ function initPage()
     }*/
 }
 
-function loginToProvider()
+function addChat(toarray)
 {
+    $('#chat-tabs').append("<div class='chat-tab'>"+ toarray +"</div>");
+
+    $("#chat-tabs").scrollTop($("#chat-tabs")[0].scrollHeight);
+
+    $(".chat-tab").click(function () {
+        $("#chat-tabs").children().each(function() {
+            $(this).css("backgroundColor", "#0f0f0f");
+            $(this).css("color", "#b48c64");
+        });
+
+        $(this).css("backgroundColor", "#b48c64");
+        $(this).css("color", "#0f0f0f");
+    });
+}
+
+function loginToProvider(user, pass, domain)
+{
+    curUser.user = user;
+    curUser.domain = domain;
+    curUser.pass = pass;
+
     var package = {
         grant_type: "password",
-        username: curUser.userid + "@" + URL,
-        password: curUser.passwd
+        username: user + "@" + domain,
+        password: pass
     };
-    $.post("https://" + URL + ":" + port + '/token/', package, function(data) {
-        //do something with that login shit
+    $.post("https://" + domain + ':4567/token/', package, function(data) {
         curUser.token = data.access_token;
     });
 
-    var messageSocket = new WebSocket("wss://"+ URL + ":" + port + "/messages/");
+    var messageSocket = new WebSocket("wss://"+ curUser.domain + ":4567/messages/");
     messageSocket.onmessage = recieveMessage(event);
 
 }
@@ -87,11 +249,6 @@ function addChatMessage(sender, msg)
     $('#chat-window').append("<div class='chat-message'><div class='sender-name'>"+"[ "+sender+" ]"+"</div><div class='message'>"+msg+"</div></div>");
 
     $("#chat-window").scrollTop($("#chat-window")[0].scrollHeight);
-}
-
-function getToIDs()
-{
-    return [curUser.userid + "@" + URL,];
 }
 
 function submitMessage()
@@ -109,8 +266,8 @@ function submitMessage()
         var curDate = new Date();
         var curDateTime = curDate.toISOString();
         var package = {
-            to: getToIDs(),
-            from: curUser.userid + "@" + URL,
+            to: curChannel.toList,
+            from: curUser.userid + "@" + curUser.domain,
             sentAt: curDateTime,
             message: msg,
             messageFormatted: msg,
@@ -118,14 +275,14 @@ function submitMessage()
         };
 
         $.ajax({
-            url: "https://" + URL + ":" + port + "/messages/",
+            url: "https://" + curUser.domain + ":4567/messages/",
             type: "POST",
             data: package,
             headers: {
                 Authorization: curUser.token
             },
             dataType: 'json'
-        })
+        });
     }
 }
 
@@ -134,10 +291,9 @@ function recieveMessage(event)
     try {
         var decoded = JSON.parse(event.data);
         addChatMessage(decoded.from, decoded.message);    
-
     }
     catch(err) {
-        
+        console.log(err);
     }
 
 }

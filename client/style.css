@@ -10,12 +10,30 @@ p {
     display: flex;
 }
 
-#chat-tabs {
+#left-sidebar {
+    width: 100px;
     margin-top: 20px;
     margin-left: 20px;
-    width: 100px;
-    border: 2px solid #b48c64;
     flex-flow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#left-button-bar {
+    margin-bottom: 4px;
+}
+
+#hide-left-sidebar {
+    height: 20px;
+    background-color: #b48c64;
+}
+
+#chat-tabs {
+    border: 2px solid #b48c64;
+    flex-grow: 1;
+    margin-bottom: 6px;
+    overflow-y: auto;
+    max-height: 564px;
 }
 
 #chat-main {
@@ -37,6 +55,13 @@ p {
     text-align: left;
     background-color: #b48c64;
     color: #0f0f0f;
+}
+
+#hidden-left-sidebar {
+    margin-top: 20px;
+    display:none;
+    width: 10px;
+    background-color: #b48c64;
 }
 
 #chat-window {
@@ -67,6 +92,29 @@ p {
 
 #message-text:focus {
     outline: none;
+}
+
+#new-chat-users {
+    width: 600px;
+    height: 46px;
+    color: #b48c64;
+    background-color: #0f0f0f;
+    border: none;
+    margin: 2px;
+    resize: none;
+    border: 2px solid #B46D64;
+}
+
+#new-chat-users:focus {
+    outline: none;
+}
+
+.input-box {
+    padding: 10px;
+    border: 2px solid #B46D64;
+    margin-bottom:6px;
+    display: none;    
+    color: #B46D64;
 }
 
 .chat-message {
@@ -100,6 +148,39 @@ p {
     background-color: #0f0f0f;
 }
 
+.sidebar-button {
+    background-color: #b48c64;
+    margin-bottom: 2px;
+    padding: 2px;
+    padding-left: 4px;
+    border-radius: 0px 0px 10px 0px;
+}
+
+input {
+    color: #B46D64;
+    background-color: #0f0f0f;
+    margin: 0;
+    margin-bottom: 10px;
+    padding-left: 5px;
+    width: 300px;
+    border: 2px solid #B46D64;
+    appearance: none;
+    box-shadow: none;
+    border-radius: none;
+    height: 20px;
+}
+
+input[type=submit] {
+    background-color: #B46D64;
+    color: #0f0f0f;
+    width: 100%;
+    margin-bottom: 0px;
+}
+
+input:focus {
+    outline: none;
+}
+
 div::-webkit-scrollbar {
     width:12px;
     background-color:#0f0f0f;
@@ -114,12 +195,12 @@ div::-webkit-scrollbar-thumb {
 }
 
 div::-webkit-scrollbar-thumb:hover {
-    background-color:#b48c64;
+    background-color:#906943;
     border: 2px #0f0f0f solid;
 }
 
 div::-webkit-scrollbar-thumb:active {
-    background-color:#8a6642;
+    background-color:#784D23;
     border: 2px #0f0f0f solid;
 }
 

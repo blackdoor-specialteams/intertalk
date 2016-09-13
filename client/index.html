@@ -7,15 +7,42 @@
     </head>
     <body>
         <div id="chat-client">
-            <div id="chat-tabs">
-                <div class="chat-tab">backenders</div>
-                <div class="chat-tab">backenders</div>
-                <div class="chat-tab">backenders</div>
-                <div class="chat-tab">backenders</div>
+            <div id="left-sidebar">
+                <div id="left-button-bar">
+                    <div class="sidebar-button" id="create-button">[!] create</div>
+                    <div class="sidebar-button" id="connect-button">connect</div>
+                    <div class="sidebar-button" id="new-chat-button">new chat</div>
+                    <div class="sidebar-button" id="disconnect-button">disconnect</div>
+                </div>
+                <div id="chat-tabs">
+                    <div class="chat-tab">no chats</div>
+                </div>
+                <div id="hide-left-sidebar"></div>
             </div>
+            <div id="hidden-left-sidebar"></div>
             <div id="chat-main">
+                <div class="input-box" id="input-box-create">
+                    <form id="createForm">
+                        username <input spellcheck="false" id="createUser" type="text"><br>
+                        password <input id="createPass" type="password"><br>
+                        <input type="submit" value="submit">
+                    </form>
+                </div>
+                <div class="input-box" id="input-box-connect">
+                    <form id="connectForm">
+                        username <input spellcheck="false" id="connectUser" type="text"><br>
+                        password <input id="connectPass" type="password"><br>
+                        <input type="submit" value="submit">
+                    </form>
+                </div>
+                <div class="input-box" id="input-box-new-chat">
+                    <form id="newChatForm">
+                        users <input spellcheck="false" id="newChatUsers" type="text"><br>
+                        <input type="submit" value="submit">
+                    </form>
+                </div>
                 <div id="chat-box">
-                    <div id="chat-title">[yacklebeam, kag0, csubj, spacekek]</div>
+                    <div id="chat-title"><span>not connected</span></div>
                     <div id="chat-window"></div>
                 </div>
                 <div id="message-box">
