@@ -77,13 +77,15 @@ function initPage()
     });
 
     $("#disconnect-button").click(function() {
-        
+        //close websocket i guess?
+        //clear session data like user and channels?
+        //add checks to stop sending and such if not logged in
     });
 
     $("#newChatForm").submit(function(e) {
         e.preventDefault();
         var toListAsString = $("#newChatUsers").val();
-        curChannel.toList = toListAsString.split(",");
+        if(toListAsString != "") curChannel.toList = toListAsString.split(",");
         curChannel.toList.push(curUser.user + "@" + curUser.domain);
         $("#chat-title span").text("[" + curChannel.toList.toString() + "]");
     });
@@ -114,14 +116,11 @@ function initPage()
             $("#input-box-connect").css("display", "none");
 
             //create user
-            var package = {
-               username: userName,
-               password: password
-            };
+            var package = '{"username":"'+userName+'","password":"'+password+'"}';
             //$.post("https://" + connectURL + ":4567/users/", package);
             $.support.cors = true;
             $.ajax({
-                url: "https://" + connectURL + ":4567/users/",
+                url: "http://" + connectURL + ":4567/users",
                 type: "POST",
                 data:package,
                 contentType:"application/json; charset=utf-8",
@@ -242,16 +241,43 @@ function loginToProvider(user, pass, domain)
 
     var package = {
         grant_type: "password",
-        username: user + "@" + domain,
+        username: user,
         password: pass
     };
-    $.post("https://" + domain + ':4567/token/', package, function(data) {
+
+    //var package = '{"grant_type":"password", "username":"'+user+'","password":"'+pass+'"}';
+    /*$.post("http://" + domain + ':4567/token', package, function(data) {
         curUser.token = data.access_token;
+    });*/
+
+    $.ajax({
+        url: "http://" + domain + ":4567/token",
+        type: "POST",
+        data:package,
+        contentType:"application/x-www-form-urlencoded",
+        success:function(data) {
+            curUser.token = data.access_token;
+            console.log("logged in");
+
+            var messageSocket = new WebSocket("ws://"+ curUser.domain + ":4567/messageStream");
+            //messageSocket.onmessage = receiveMessage(event);
+            messageSocket.onmessage= function(event) {
+                console.log("received message");
+                try {
+                    console.log(event.data);
+                    var decoded = JSON.parse(event.data);
+                    addChatMessage(decoded.from, decoded.message);    
+                }
+                catch(err) {
+                    console.log(err);
+                }
+            }
+
+            messageSocket.onopen = function(event) {
+                messageSocket.send(curUser.token);
+            }
+        }
     });
-
-    var messageSocket = new WebSocket("wss://"+ curUser.domain + ":4567/messages/");
-    messageSocket.onmessage = recieveMessage(event);
-
 }
 
 function loadLines()
@@ -259,8 +285,11 @@ function loadLines()
     document.getElementById("chat-window").style.backgroundColor = "#ffffff";
 }
 
-function addChatMessage(sender, msg)
+function addChatMessage(senderFull, msg)
 {
+    var indexOfAt = senderFull.indexOf("@");
+    var sender = senderFull.substring(0, indexOfAt);
+
     $('#chat-window').append("<div class='chat-message'><div class='sender-name'>"+"[ "+sender+" ]"+"</div><div class='message'>"+msg+"</div></div>");
 
     $("#chat-window").scrollTop($("#chat-window")[0].scrollHeight);
@@ -282,27 +311,43 @@ function submitMessage()
         var curDateTime = curDate.toISOString();
         var package = {
             to: curChannel.toList,
-            from: curUser.userid + "@" + curUser.domain,
+            from: curUser.user + "@" + curUser.domain,
             sentAt: curDateTime,
             message: msg,
             messageFormatted: msg,
             format: "text/markdown"
         };
 
+        var jPackage = JSON.stringify(package);
+
         $.ajax({
-            url: "https://" + curUser.domain + ":4567/messages/",
+            url: "http://" + curUser.domain + ":4567/messages",
+            type: "POST",
+            data: jPackage,
+            headers: {
+                Authorization: curUser.token
+            },
+            contentType:"application/json; charset=utf-8",
+            success: function(data) {
+                console.log("message sent");
+            }
+        });
+
+        /*$.ajax({
+            url: "https://" + curUser.domain + ":4567/messages",
             type: "POST",
             data: package,
             headers: {
                 Authorization: curUser.token
             },
             dataType: 'json'
-        });
+        });*/
     }
 }
 
-function recieveMessage(event)
+function receiveMessage(event)
 {
+    console.log("received message");
     try {
         var decoded = JSON.parse(event.data);
         addChatMessage(decoded.from, decoded.message);    
