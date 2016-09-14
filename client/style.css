@@ -59,6 +59,7 @@ p {
 
 #hidden-left-sidebar {
     margin-top: 20px;
+    margin-left: 20px;
     display:none;
     width: 10px;
     background-color: #b48c64;
@@ -107,6 +108,12 @@ p {
 
 #new-chat-users:focus {
     outline: none;
+}
+
+#status-bar {
+    color: #b48c64;
+    margin-left: 20px;
+    margin-top: 6px;
 }
 
 .input-box {

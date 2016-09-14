@@ -20,7 +20,6 @@ function initPage()
         });
 
         $(this).css("backgroundColor", "#b48c64");
-        //$(this).css("backgroundColor", "#B46D64");
         $(this).css("color", "#0f0f0f");
     });
 
@@ -80,21 +79,27 @@ function initPage()
         //close websocket i guess?
         //clear session data like user and channels?
         //add checks to stop sending and such if not logged in
+        $("#chat-title span").text("");
+        $("#status-bar span").text("status: disconnected.  click [create] to make account or [connect] to login");
     });
 
     $("#newChatForm").submit(function(e) {
         e.preventDefault();
+        ////// CREATE CHANNEL
         var toListAsString = $("#newChatUsers").val();
         if(toListAsString != "") curChannel.toList = toListAsString.split(",");
         curChannel.toList.push(curUser.user + "@" + curUser.domain);
         $("#chat-title span").text("[" + curChannel.toList.toString() + "]");
+        $("#status-bar span").text("status: chatting with [" + curChannel.toList.toString() + "]");
+        ///// END CREATE CHANNEL
+        $("#new-chat-button").css("backgroundColor", "#b48c64");
+        $("#input-box-new-chat").css("display", "none");
     });
 
     $("#createForm").submit(function(e) {
         e.preventDefault();
         var fullUsername = $("#createUser").val();
         var password = $("#createPass").val();
-        //is this safe????
 
         if(fullUsername == "" || password == "")
         {
@@ -115,15 +120,22 @@ function initPage()
             $("#connect-button").css("backgroundColor", "#b48c64");
             $("#input-box-connect").css("display", "none");
 
-            //create user
             var package = '{"username":"'+userName+'","password":"'+password+'"}';
-            //$.post("https://" + connectURL + ":4567/users/", package);
             $.support.cors = true;
             $.ajax({
                 url: "http://" + connectURL + ":4567/users",
                 type: "POST",
                 data:package,
                 contentType:"application/json; charset=utf-8",
+                success: function(data) {
+                    $("#status-bar span").text("status: account created. click [connect] to login");
+                },
+                error: function(data) {
+                    $("#status-bar span").text("status: account creation failed");
+                },
+                beforeSend: function() {
+                    $("#status-bar span").text("status: creating account...please wait");
+                }
             });
         }
         else
@@ -137,7 +149,6 @@ function initPage()
         e.preventDefault();
         var fullUsername = $("#connectUser").val();
         var password = $("#connectPass").val();
-        //is this safe????
 
         if(fullUsername == "" || password == "")
         {
@@ -158,10 +169,7 @@ function initPage()
             $("#connect-button").css("backgroundColor", "#b48c64");
             $("#input-box-connect").css("display", "none");
 
-            //connect
             loginToProvider(userName, password, connectURL);
-
-            $("#chat-title span").text("connected, no chat opened");
         }
         else
         {
@@ -197,23 +205,6 @@ function initPage()
             var count = (txt.match(/\n/g) || []).length;
         }
     });
-
-    //var package = {
-    //    username: "yacklebeam",
-    //    password: "password"
-    //};
-    //$.post("https://" + URL + ":" + port + '/users/', package);
-
-    // connect the websocket connection for messages?
-    //curUser.userid = "yacklebeam";
-    //curUser.passwd = "password"
-    //loginToProvider();
-
-    //load dummy messages
-    /*for(i = 0; i < 120; ++i)
-    {
-        addChatMessage("test-johnsmiths", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc eget rutrum tellus. Etiam tempor, justo ac fermentum sodales, dolor felis condimentum ligula, vel molestie lacus nibh non magna.");
-    }*/
 }
 
 function addChat(toarray)
@@ -252,33 +243,28 @@ function loginToProvider(user, pass, domain)
         data:package,
         contentType:"application/x-www-form-urlencoded",
         success:function(data) {
+            $("#status-bar span").text("status: logged in. click [new chat] to set chat list");
             curUser.token = data.access_token;
-            console.log("logged in");
-
             var messageSocket = new WebSocket("ws://"+ curUser.domain + ":4567/messageStream");
-            //messageSocket.onmessage = receiveMessage(event);
             messageSocket.onmessage= function(event) {
-                console.log("received message");
                 try {
-                    console.log(event.data);
                     var decoded = JSON.parse(event.data);
                     addChatMessage(decoded.from, decoded.message);    
                 }
                 catch(err) {
-                    console.log(err);
                 }
             }
-
             messageSocket.onopen = function(event) {
                 messageSocket.send(curUser.token);
             }
+        },
+        error: function(data) {
+            $("#status-bar span").text("status: login failed");
+        },
+        beforeSend: function() {
+            $("#status-bar span").text("status: logging in...please wait");
         }
     });
-}
-
-function loadLines()
-{
-    document.getElementById("chat-window").style.backgroundColor = "#ffffff";
 }
 
 function addChatMessage(senderFull, msg)
@@ -302,7 +288,6 @@ function submitMessage()
     else
     {
         $("#message-text").val("")
-        //send the message to the provider
         var curDate = new Date();
         var curDateTime = curDate.toISOString();
         var package = {
@@ -323,35 +308,9 @@ function submitMessage()
             headers: {
                 Authorization: curUser.token
             },
-            contentType:"application/json; charset=utf-8",
-            success: function(data) {
-                console.log("message sent");
-            }
+            contentType:"application/json; charset=utf-8"
         });
-
-        /*$.ajax({
-            url: "https://" + curUser.domain + ":4567/messages",
-            type: "POST",
-            data: package,
-            headers: {
-                Authorization: curUser.token
-            },
-            dataType: 'json'
-        });*/
     }
-}
-
-function receiveMessage(event)
-{
-    console.log("received message");
-    try {
-        var decoded = JSON.parse(event.data);
-        addChatMessage(decoded.from, decoded.message);    
-    }
-    catch(err) {
-        console.log(err);
-    }
-
 }
 
 $(document).ready(initPage);
