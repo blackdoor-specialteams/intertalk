@@ -2,12 +2,11 @@ package black.door.intertalk;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kag0.oauth2.TokenResponse;
-import com.github.kag0.oauth2.TokenType;
+import com.github.kag0.oauth2.password.ImmutablePasswordTokenRequest;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import io.github.kag0.oauth2.password.ImmutablePasswordTokenRequest;
-import javaslang.collection.HashSet;
+import javaslang.collection.TreeSet;
 import lombok.SneakyThrows;
 import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.asynchttpclient.ws.WebSocket;
@@ -90,8 +89,8 @@ public class MessageControllerTest {
 						}).build()).get();
 
 		Message m = ImmutableMessage.builder()
-				.from("jim@localhost")
-				.to(HashSet.of("alice@ecorp.com", "jim@localhost"))
+				.from(MailAddress.parse("jim@localhost").get())
+				.to(TreeSet.of(MailAddress.parse("alice@ecorp.com").get(), MailAddress.parse("jim@localhost").get()))
 				.message("hello world")
 				.sentAt(OffsetDateTime.now())
 				.build();

@@ -143,7 +143,7 @@ POST /users
 
 ### Login
 
-Log in to the refrerence provider with OAuth2 password grant (`POST` to `/token`).
+Log in to the refrerence provider with [OAuth2 password grant](https://tools.ietf.org/html/rfc6749#section-4.3.2) (`POST` to `/token`).
 
 ### Sending Messages
 

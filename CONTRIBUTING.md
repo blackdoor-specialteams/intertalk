@@ -16,3 +16,8 @@ Server should be listening on port 4567
 4. Migrate db `mvn flyway:migrate`
 
 > note: 3 and 4 only need to be done once
+
+## Using SSL
+
+To enable SSL, provide a java keystore file `keystore.jks` in the working directory and set `INTERTALK_KEYSTORE_PASSWORD` with the password.
+If running with containers, use docker volumes for the keystore file by adding `-v /home/me/mykeystorefile:/usr/src/app/keystore.jks` to `docker run`.

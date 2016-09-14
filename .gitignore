@@ -12,3 +12,5 @@ buildNumber.properties
 
 target/generated-sources/*
 !target/generated-sources/jooq
+
+*.jks

@@ -2,7 +2,7 @@ package black.door.intertalk;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import javaslang.collection.Set;
+import javaslang.collection.TreeSet;
 import org.immutables.value.Value;
 
 import java.time.OffsetDateTime;
@@ -15,8 +15,8 @@ import java.util.Optional;
 @JsonSerialize(as = ImmutableMessage.class)
 @JsonDeserialize(as = ImmutableMessage.class)
 public interface Message {
-	Set<String> to(); //InternetAddress
-	String from(); //InternetAddress
+	TreeSet<MailAddress> to();
+	MailAddress from();
 	OffsetDateTime sentAt();
 	Optional<OffsetDateTime> receivedAt();
 	String message();

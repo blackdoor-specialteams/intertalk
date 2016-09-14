@@ -36,7 +36,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Messages extends TableImpl<MessagesRecord> {
 
-    private static final long serialVersionUID = -1514059396;
+    private static final long serialVersionUID = -242875409;
 
     /**
      * The reference instance of <code>public.messages</code>
@@ -59,7 +59,7 @@ public class Messages extends TableImpl<MessagesRecord> {
     /**
      * The column <code>public.messages.to</code>.
      */
-    public final TableField<MessagesRecord, String> TO = createField("to", org.jooq.impl.SQLDataType.VARCHAR.nullable(false), this, "");
+    public final TableField<MessagesRecord, String[]> TO = createField("to", org.jooq.impl.SQLDataType.VARCHAR.getArrayDataType(), this, "");
 
     /**
      * The column <code>public.messages.from</code>.

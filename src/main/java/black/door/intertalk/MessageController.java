@@ -45,16 +45,16 @@ public class MessageController {
 
 		// persist message
 
-			MessagesRecord record = new MessagesRecord(); // todo bind record mapper
-			record.setTo(message.to().toString()); // todo sort first
-			record.setFrom(message.from());
-			record.setSentAt(Timestamp.from(message.sentAt().toInstant()));
-			record.setReceivedAt(Timestamp.from(message.receivedAt().get().toInstant()));
-			record.setMessage(message.message());
+		MessagesRecord record = new MessagesRecord(); // todo bind record mapper
+		record.setTo(message.to().map(MailAddress::toString).toJavaArray(String.class));
+		record.setFrom(message.from().toString());
+		record.setSentAt(Timestamp.from(message.sentAt().toInstant()));
+		record.setReceivedAt(Timestamp.from(message.receivedAt().get().toInstant()));
+		record.setMessage(message.message());
 		message.messageFormatted().ifPresent(record::setMessageFormatted);
 		message.format().ifPresent(record::setFormat);
 
-			create.executeInsert(record);
+		create.executeInsert(record);
 
 
 		SubscriberController.notifyUsers(message.to(), message);
