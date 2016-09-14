@@ -327,7 +327,8 @@ function submitMessage()
             type: "POST",
             data: jPackage,
             headers: {
-                Authorization: curUser.token
+                Authorization: curUser.token,
+                
             },
             contentType:"application/json; charset=utf-8"
         });
