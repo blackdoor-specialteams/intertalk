@@ -5,24 +5,25 @@ var curUser = {
     domain: ""
 };
 
-var chatTabList = [];
+var chatContexts = [];
 
 var curChannel = {
     toList: [],
 };
 
+Array.prototype.compare = function(testArr) {
+    if (this.length != testArr.length) return false;
+    for (var i = 0; i < testArr.length; i++) {
+        if (this[i].compare) { //To test values in nested arrays
+            if (!this[i].compare(testArr[i])) return false;
+        }
+        else if (this[i] !== testArr[i]) return false;
+    }
+    return true;
+}
+
 function initPage()
 {
-    $(".chat-tab").click(function () {
-        $("#chat-tabs").children().each(function() {
-            $(this).css("backgroundColor", "#0f0f0f");
-            $(this).css("color", "#b48c64");
-        });
-
-        $(this).css("backgroundColor", "#b48c64");
-        $(this).css("color", "#0f0f0f");
-    });
-
     $("#hide-left-sidebar").click(function() {
         $("#left-sidebar").css("display", "none");
         $("#hidden-left-sidebar").css("display", "block");
@@ -91,6 +92,8 @@ function initPage()
         curChannel.toList.push(curUser.user + "@" + curUser.domain);
         $("#chat-title span").text("[" + curChannel.toList.toString() + "]");
         $("#status-bar span").text("status: chatting with [" + curChannel.toList.toString() + "]");
+
+        addChat(curChannel.toList);
         ///// END CREATE CHANNEL
         $("#new-chat-button").css("backgroundColor", "#b48c64");
         $("#input-box-new-chat").css("display", "none");
@@ -123,7 +126,7 @@ function initPage()
             var package = '{"username":"'+userName+'","password":"'+password+'"}';
             $.support.cors = true;
             $.ajax({
-                url: "http://" + connectURL + ":4567/users",
+                url: "https://" + connectURL + ":4567/users",
                 type: "POST",
                 data:package,
                 contentType:"application/json; charset=utf-8",
@@ -207,6 +210,11 @@ function initPage()
     });
 }
 
+function getCurrentChatContextIndex(toList)
+{
+
+}
+
 function addChat(toarray)
 {
     $('#chat-tabs').append("<div class='chat-tab'>"+ toarray +"</div>");
@@ -221,7 +229,17 @@ function addChat(toarray)
 
         $(this).css("backgroundColor", "#b48c64");
         $(this).css("color", "#0f0f0f");
+        var chatToList = $(this).text();
+        curChannel.toList = chatToList;
+        $("#chat-title span").text("[" + curChannel.toList.toString() + "]");
+        $("#status-bar span").text("status: chatting with [" + curChannel.toList.toString() + "]");
     });
+
+    var newChat;
+    /*newChat.toList = curChannel.toList;
+    newChat.messages = [];
+
+    chatContexts.push(newChat);*/
 }
 
 function loginToProvider(user, pass, domain)
@@ -238,14 +256,14 @@ function loginToProvider(user, pass, domain)
     $.support.cors = true;
 
     $.ajax({
-        url: "http://" + domain + ":4567/token",
+        url: "https://" + domain + ":4567/token",
         type: "POST",
         data:package,
         contentType:"application/x-www-form-urlencoded",
         success:function(data) {
             $("#status-bar span").text("status: logged in. click [new chat] to set chat list");
             curUser.token = data.access_token;
-            var messageSocket = new WebSocket("ws://"+ curUser.domain + ":4567/messageStream");
+            var messageSocket = new WebSocket("wss://"+ curUser.domain + ":4567/messageStream");
             messageSocket.onmessage= function(event) {
                 try {
                     var decoded = JSON.parse(event.data);
@@ -269,6 +287,9 @@ function loginToProvider(user, pass, domain)
 
 function addChatMessage(senderFull, msg)
 {
+    //save message to context message list
+
+
     var indexOfAt = senderFull.indexOf("@");
     var sender = senderFull.substring(0, indexOfAt);
 
@@ -302,7 +323,7 @@ function submitMessage()
         var jPackage = JSON.stringify(package);
 
         $.ajax({
-            url: "http://" + curUser.domain + ":4567/messages",
+            url: "https://" + curUser.domain + ":4567/messages",
             type: "POST",
             data: jPackage,
             headers: {
