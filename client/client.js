@@ -244,11 +244,7 @@ function loginToProvider(user, pass, domain)
         username: user,
         password: pass
     };
-
-    //var package = '{"grant_type":"password", "username":"'+user+'","password":"'+pass+'"}';
-    /*$.post("http://" + domain + ':4567/token', package, function(data) {
-        curUser.token = data.access_token;
-    });*/
+    $.support.cors = true;
 
     $.ajax({
         url: "http://" + domain + ":4567/token",
