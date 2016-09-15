@@ -124,7 +124,7 @@ function initPage()
         $("#create-button").css("backgroundColor", "#b48c64");
         $("#input-box-create").css("display", "none");
 
-        var package = '{"username":"'+userName+'","password":"'+password+'"}';
+        var package = '{"username":"'+fullUsername+'","password":"'+password+'"}';
         $.support.cors = true;
         $.ajax({
             url: "https://" + cDomain + "/users",
@@ -164,7 +164,7 @@ function initPage()
         $("#connect-button").css("backgroundColor", "#b48c64");
         $("#input-box-connect").css("display", "none");
 
-        loginToProvider(userName, password, cDomain);
+        loginToProvider(fullUsername, password, cDomain);
     });
 
     $("#message-text").keydown(function(evt)
