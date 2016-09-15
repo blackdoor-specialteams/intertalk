@@ -116,6 +116,12 @@ p {
     margin-top: 6px;
 }
 
+#version-bar {
+    color: #b48c64;
+    margin-left: 20px;
+    margin-top: 6px;
+}
+
 .input-box {
     padding: 10px;
     border: 2px solid #B46D64;

@@ -273,6 +273,7 @@ function loginToProvider(user, pass, domain)
                 }
             }
             messageSocket.onopen = function(event) {
+                console.log(curUser.token);
                 messageSocket.send(curUser.token);
             }
         },
@@ -329,7 +330,6 @@ function submitMessage()
             data: jPackage,
             contentType:"application/json; charset=utf-8",
             beforeSend: function(xhr) {
-                console.log(curUser.token);
                 xhr.setRequestHeader('Authorization', curUser.token);
             }
         });
