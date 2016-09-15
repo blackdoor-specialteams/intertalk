@@ -265,7 +265,7 @@ function loginToProvider(user, pass, domainIn)
         success:function(data) {
             $("#status-bar span").text("status: logged in. click [new chat] to set chat list");
             curUser.token = data.access_token;
-            var messageSocket = new WebSocket("wss://"+ curUser.domain + ":4567/messageStream");
+            var messageSocket = new WebSocket("wss://"+ curUser.domain + "/messageStream");
             messageSocket.onmessage= function(event) {
                 try {
                     var decoded = JSON.parse(event.data);
