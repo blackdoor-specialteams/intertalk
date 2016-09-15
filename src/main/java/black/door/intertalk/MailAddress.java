@@ -7,12 +7,12 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import org.apache.commons.validator.routines.EmailValidator;
 import javaslang.control.Try;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.io.IOException;
-
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -41,10 +41,12 @@ public class MailAddress implements Comparable{
 
 	public static boolean Validate(String addr) {
 		boolean result = true;
+        boolean local = true;
 		try {
 			InternetAddress email = new InternetAddress(addr);
 			email.validate();
 
+            EmailValidator.getInstance(local).isValid(addr);
 			// if (email.toString().contains("localhost")) result = false;
 			// if (email.toString().contains("127.0.0.1")) result = false;
 
