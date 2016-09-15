@@ -117,6 +117,7 @@ p {
 }
 
 #version-bar {
+    font-size: 0.8em;
     color: #b48c64;
     margin-left: 20px;
     margin-top: 6px;
