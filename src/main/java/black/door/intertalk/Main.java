@@ -10,6 +10,7 @@ import io.jsonwebtoken.impl.crypto.MacProvider;
 import javaslang.Function3;
 import javaslang.jackson.datatype.JavaslangModule;
 import lombok.val;
+import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Request;
@@ -82,7 +83,14 @@ public class Main {
 		});
 
 		pool(conf);
+		if(conf.getBoolean("intertalk.automigrate"))
+			migrate();
+	}
 
+	private static void migrate(){
+		Flyway f = new Flyway();
+		f.setDataSource(hikari);
+		f.migrate();
 	}
 
 	private static Route buildLoginController(DataSource ds,
