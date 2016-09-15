@@ -127,6 +127,8 @@ public class Main {
 				response.header("Access-Control-Allow-Methods", accessControlRequestMethod);
 			}
 
+			response.header("Access-Control-Max-Age", "86400");
+
 			return "OK";
 		});
 

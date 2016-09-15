@@ -58,6 +58,8 @@ public class AuthController {
 			val claims = jwt.getBody();
 
 			val tryMessage = Try.of(() -> mapper.readValue(req.bodyAsBytes(), Message.class));
+			if(tryMessage.isFailure())
+				halt(400);
 			val message = tryMessage.get();
 
 			if (req.attribute(CALLER_IS_PROVIDER)) {
