@@ -285,7 +285,7 @@ function loginToProvider(user, pass, domainIn, portIn)
             messageSocket.onclose = function(event) {
                 //we should recconnect here is the ws was dropped by the server
                 //else give an error
-                console.log("websocket closed " + event.data);
+                console.log("websocket closed (" + event.code + ") " + event.reason);
             }
         },
         error: function(data) {
