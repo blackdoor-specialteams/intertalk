@@ -3,12 +3,14 @@ package black.door.intertalk;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.zaxxer.hikari.HikariDataSource;
 import io.jsonwebtoken.impl.crypto.MacProvider;
 import javaslang.Function3;
 import javaslang.jackson.datatype.JavaslangModule;
 import lombok.val;
+import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Request;
@@ -55,6 +57,7 @@ public class Main {
 		Supplier<KeyController> keyControllerSupplier = KeyController::new;
 		Supplier<AuthController> authControllerSupplier = () -> new AuthController(mapper, tokenKey, domain);
 
+		port(conf.getInt("intertalk.port"));
 		if(conf.hasPath("intertalk.keystore.password"))
 			secure("keystore.jks", conf.getString("intertalk.keystore.password"), null, null);
 
@@ -76,11 +79,18 @@ public class Main {
 		exception(RuntimeException.class, (exception, request, response) -> {
 			logger.error("exception in controller", exception);
 			response.status(500);
-			response.body("0opz");
+			response.body("o0pz");
 		});
 
+		pool(conf);
+		if(conf.getBoolean("intertalk.automigrate"))
+			migrate();
+	}
 
-
+	private static void migrate(){
+		Flyway f = new Flyway();
+		f.setDataSource(hikari);
+		f.migrate();
 	}
 
 	private static Route buildLoginController(DataSource ds,
@@ -113,6 +123,14 @@ public class Main {
 		};
 	}
 
+	private static void pool(Config conf){
+		if(conf.hasPath("intertalk.threadmult")) {
+			int mult = conf.getInt("intertalk.threadmult");
+			int cores = Runtime.getRuntime().availableProcessors();
+			threadPool(cores * mult, cores, 60000);
+		}
+	}
+
 	// Enables CORS on requests. This method is an initialization method and should be called once.
 	private static void enableCORS(final String origin, final String methods, final String headers) {
 
@@ -126,6 +144,8 @@ public class Main {
 			if (accessControlRequestMethod != null) {
 				response.header("Access-Control-Allow-Methods", accessControlRequestMethod);
 			}
+
+			response.header("Access-Control-Max-Age", "86400");
 
 			return "OK";
 		});

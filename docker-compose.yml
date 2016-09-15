@@ -1,0 +1,15 @@
+version: '2'
+services:
+  intertalk_db:
+    image: postgres
+  intertalk:
+    image: blackdoor/intertalk
+    environment:
+      - INTERTALK_DOMAIN
+      - INTERTALK_DB_HOST=intertalk_db
+    depends_on:
+      - intertalk_db
+    links:
+      - intertalk_db
+    ports:
+      - "9869:9869"

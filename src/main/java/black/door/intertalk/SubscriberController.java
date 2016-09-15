@@ -2,6 +2,7 @@ package black.door.intertalk;
 
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import javaslang.control.Try;
 import lombok.val;
 import org.eclipse.jetty.websocket.api.Session;
@@ -59,7 +60,7 @@ public class SubscriberController {
 					sessions = sz;
 			}
 			sessions.add(session);
-		}catch (ClaimJwtException e){
+		}catch (ClaimJwtException | MalformedJwtException e){
 			session.close(4001, "bad token");
 		}
 	}
