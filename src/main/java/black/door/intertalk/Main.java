@@ -3,6 +3,7 @@ package black.door.intertalk;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.zaxxer.hikari.HikariDataSource;
 import io.jsonwebtoken.impl.crypto.MacProvider;
@@ -76,10 +77,10 @@ public class Main {
 		exception(RuntimeException.class, (exception, request, response) -> {
 			logger.error("exception in controller", exception);
 			response.status(500);
-			response.body("0opz");
+			response.body("o0pz");
 		});
 
-
+		pool(conf);
 
 	}
 
@@ -111,6 +112,14 @@ public class Main {
 				return method.apply(new MessageController(mapper, connection), req, res);
 			}
 		};
+	}
+
+	private static void pool(Config conf){
+		if(conf.hasPath("intertalk.threadmult")) {
+			int mult = conf.getInt("intertalk.threadmult");
+			int cores = Runtime.getRuntime().availableProcessors();
+			threadPool(cores * mult, cores, 60000);
+		}
 	}
 
 	// Enables CORS on requests. This method is an initialization method and should be called once.

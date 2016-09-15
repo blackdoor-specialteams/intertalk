@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-docker run --link postgres -d -p 4567:4567 \
+docker run --link postgres -d -p 6668:6668 \
  -e INTERTALK_DOMAIN \
  -e INTERTALK_DB_HOST=postgres \
  blackdoor/intertalk

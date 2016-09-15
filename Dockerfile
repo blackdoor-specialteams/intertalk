@@ -4,6 +4,6 @@ COPY . /usr/src/app
 WORKDIR /usr/src/app
 RUN mvn compile assembly:single
 
-EXPOSE 4567
+EXPOSE 6668
 
 ENTRYPOINT ["java", "-jar", "target/intertalk.jar"]
