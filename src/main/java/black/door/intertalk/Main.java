@@ -56,6 +56,7 @@ public class Main {
 		Supplier<KeyController> keyControllerSupplier = KeyController::new;
 		Supplier<AuthController> authControllerSupplier = () -> new AuthController(mapper, tokenKey, domain);
 
+		port(conf.getInt("intertalk.port"));
 		if(conf.hasPath("intertalk.keystore.password"))
 			secure("keystore.jks", conf.getString("intertalk.keystore.password"), null, null);
 
