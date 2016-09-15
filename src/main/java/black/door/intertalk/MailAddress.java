@@ -46,7 +46,7 @@ public class MailAddress implements Comparable{
 			InternetAddress email = new InternetAddress(addr);
 			email.validate();
 
-            EmailValidator.getInstance(local).isValid(addr);
+			EmailValidator.getInstance(local).isValid(addr);
 			// if (email.toString().contains("localhost")) result = false;
 			// if (email.toString().contains("127.0.0.1")) result = false;
 
