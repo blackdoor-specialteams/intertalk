@@ -300,6 +300,19 @@ function addChatMessage(senderFull, msg)
     $("#chat-window").scrollTop($("#chat-window")[0].scrollHeight);
 }
 
+function addDomains(toList)
+{
+    newToList = [];
+    for(var i = 0; i < toList.length; ++i)
+    {
+        var user = toList[i];
+        if(user.indexOf("@") == -1) user += "@" + curUser.domain;
+
+        newToList.push(user);
+    }
+    return newToList;
+}
+
 function submitMessage()
 {
     var msg = $("#message-text").val();
@@ -314,7 +327,7 @@ function submitMessage()
         var curDate = new Date();
         var curDateTime = curDate.toISOString();
         var package = {
-            to: curChannel.toList,
+            to: addDomains(curChannel.toList),
             from: curUser.user + "@" + curUser.domain,
             sentAt: curDateTime,
             message: msg,
@@ -326,7 +339,7 @@ function submitMessage()
 
         $.support.cors = true;
         $.ajax({
-            url: "https://" + curUser.domain + ":4567/messages",
+            url: "https://" + curUser.domain + "/messages",
             type: "POST",
             data: jPackage,
             contentType:"application/json; charset=utf-8",
