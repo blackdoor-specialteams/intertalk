@@ -33,6 +33,7 @@ p {
     flex-grow: 1;
     margin-bottom: 6px;
     overflow-y: auto;
+    overflow-x: visible;
     max-height: 564px;
 }
 
@@ -154,10 +155,11 @@ p {
 }
 
 .chat-tab, .chat-tab-title {
+    min-width: 88px;
     height: 1.0em;
     padding: 4px;
+    display: inline-block;
     padding-top: 2px;
-    display:inline-block;
     text-align: left;
     color: #b48c64;
     background-color: #0f0f0f;
@@ -169,6 +171,10 @@ p {
     padding: 2px;
     padding-left: 4px;
     border-radius: 0px 0px 10px 0px;
+}
+
+.input-tag {
+
 }
 
 input {

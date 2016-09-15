@@ -22,21 +22,24 @@
             <div id="chat-main">
                 <div class="input-box" id="input-box-create">
                     <form id="createForm">
-                        username <input spellcheck="false" id="createUser" type="text"><br>
-                        password <input id="createPass" type="password"><br>
+                        <div class="input-tag">username</div><input spellcheck="false" id="createUser" type="text"><br>
+                        <div class="input-tag">password</div><input id="createPass" type="password"><br>
+                        <div class="input-tag">provider</div><input spellcheck="false" id="createProvider" type="text"><br>
                         <input type="submit" value="submit">
                     </form>
                 </div>
                 <div class="input-box" id="input-box-connect">
                     <form id="connectForm">
-                        username <input spellcheck="false" id="connectUser" type="text"><br>
-                        password <input id="connectPass" type="password"><br>
+                        <div class="input-tag">username</div><input spellcheck="false" id="connectUser" type="text"><br>
+                        <div class="input-tag">password</div><input id="connectPass" type="password"><br>
+                        <div class="input-tag">provider</div><input spellcheck="false" id="connectProvider" type="text"><br>                        
                         <input type="submit" value="submit">
                     </form>
                 </div>
                 <div class="input-box" id="input-box-new-chat">
                     <form id="newChatForm">
-                        users <input spellcheck="false" id="newChatUsers" type="text"><br>
+                        <div class="input-tag">name</div><input spellcheck="false" id="newChatName" type="text"><br>
+                        <div class="input-tag">users</div><input spellcheck="false" id="newChatUsers" type="text"><br>
                         <input type="submit" value="submit">
                     </form>
                 </div>
@@ -50,6 +53,6 @@
             </div>
         </div>
         <div id="status-bar"><span>status: disconnected.  click [create] to make account or [connect] to login</span></div>
-        <div id="version-bar"><span>v1.0.9</span></div>
+        <div id="version-bar"><span>v1.0.11</span></div>
     </body>
 </html>

@@ -88,97 +88,83 @@ function initPage()
         e.preventDefault();
         ////// CREATE CHANNEL
         var toListAsString = $("#newChatUsers").val();
+        var channelName = $("#newChatName").val();
         if(toListAsString != "") curChannel.toList = toListAsString.split(",");
         curChannel.toList.push(curUser.user + "@" + curUser.domain);
-        $("#chat-title span").text("[" + curChannel.toList.toString() + "]");
-        $("#status-bar span").text("status: chatting with [" + curChannel.toList.toString() + "]");
+        curChannel.name = channelName;
+        $("#chat-title span").text(channelName + ":[" + curChannel.toList.toString() + "]");
+        $("#status-bar span").text("status: chatting on "+channelName+" with [" + curChannel.toList.toString() + "]");
 
-        addChat(curChannel.toList);
+        addChat(channelName, curChannel.toList);
         ///// END CREATE CHANNEL
         $("#new-chat-button").css("backgroundColor", "#b48c64");
         $("#input-box-new-chat").css("display", "none");
+        $("#newChatName").val("");
+        $("#newChatUsers").val("");
     });
 
     $("#createForm").submit(function(e) {
         e.preventDefault();
         var fullUsername = $("#createUser").val();
         var password = $("#createPass").val();
+        var cDomain = $("#createProvider").val();
 
-        if(fullUsername == "" || password == "")
+        if(fullUsername == "" || password == "" || cDomain == "")
         {
             $("#createUser").val("");
             $("#createPass").val("");
+            $("#createProvider").val("");
             return;
-        }        
+        }         
 
-        var indexOfAt = fullUsername.indexOf("@");
-        if(indexOfAt > 0)
-        {
-            var userName = fullUsername.substring(0, indexOfAt);
-            var connectURL = fullUsername.substring(indexOfAt + 1);
+        $("#createUser").val("");
+        $("#createPass").val("");
+        $("#createProvider").val("");
 
-            $("#createUser").val("");
-            $("#createPass").val("");
+        $("#create-button").css("backgroundColor", "#b48c64");
+        $("#input-box-create").css("display", "none");
 
-            $("#connect-button").css("backgroundColor", "#b48c64");
-            $("#input-box-connect").css("display", "none");
-
-            var package = '{"username":"'+userName+'","password":"'+password+'"}';
-            $.support.cors = true;
-            $.ajax({
-                url: "https://" + connectURL + ":4567/users",
-                type: "POST",
-                data:package,
-                contentType:"application/json; charset=utf-8",
-                success: function(data) {
-                    $("#status-bar span").text("status: account created. click [connect] to login");
-                },
-                error: function(data) {
-                    $("#status-bar span").text("status: account creation failed");
-                },
-                beforeSend: function() {
-                    $("#status-bar span").text("status: creating account...please wait");
-                }
-            });
-        }
-        else
-        {
-            $("#createUser").val("TRY <username>@<provider domain>");
-            $("#createPass").val("");
-        }
+        var package = '{"username":"'+userName+'","password":"'+password+'"}';
+        $.support.cors = true;
+        $.ajax({
+            url: "https://" + cDomain + "/users",
+            type: "POST",
+            data:package,
+            contentType:"application/json; charset=utf-8",
+            success: function(data) {
+                $("#status-bar span").text("status: account created. click [connect] to login");
+            },
+            error: function(data) {
+                $("#status-bar span").text("status: account creation might have failed (try to connect?)");
+            },
+            beforeSend: function() {
+                $("#status-bar span").text("status: creating account...please wait");
+            }
+        });
     });
 
     $("#connectForm").submit(function(e){
         e.preventDefault();
         var fullUsername = $("#connectUser").val();
         var password = $("#connectPass").val();
+        var cDomain = $("#connectProvider").val();
 
-        if(fullUsername == "" || password == "")
+        if(fullUsername == "" || password == "" || cDomain == "")
         {
             $("#connectUser").val("");
             $("#connectPass").val("");
+            $("#connectProvider").val("");
             return;
         }        
 
-        var indexOfAt = fullUsername.indexOf("@");
-        if(indexOfAt > 0)
-        {
-            var userName = fullUsername.substring(0, indexOfAt);
-            var connectURL = fullUsername.substring(indexOfAt + 1);
+        $("#connectUser").val("");
+        $("#connectPass").val("");
+        $("#connectProvider").val("");
 
-            $("#connectUser").val("");
-            $("#connectPass").val("");
+        $("#connect-button").css("backgroundColor", "#b48c64");
+        $("#input-box-connect").css("display", "none");
 
-            $("#connect-button").css("backgroundColor", "#b48c64");
-            $("#input-box-connect").css("display", "none");
-
-            loginToProvider(userName, password, connectURL);
-        }
-        else
-        {
-            $("#connectUser").val("TRY <username>@<provider domain>");
-            $("#connectPass").val("");
-        }
+        loginToProvider(userName, password, cDomain);
     });
 
     $("#message-text").keydown(function(evt)
@@ -215,9 +201,9 @@ function getCurrentChatContextIndex(toList)
 
 }
 
-function addChat(toarray)
+function addChat(name, toarray)
 {
-    $('#chat-tabs').append("<div class='chat-tab'>"+ toarray +"</div>");
+    $('#chat-tabs').append("<div class='chat-tab'><span>"+ name +"</span></div>");
 
     $("#chat-tabs").scrollTop($("#chat-tabs")[0].scrollHeight);
 
@@ -229,23 +215,39 @@ function addChat(toarray)
 
         $(this).css("backgroundColor", "#b48c64");
         $(this).css("color", "#0f0f0f");
-        var chatToList = $(this).text();
+        
+        var chatName = $(this).text();
+        var chatToList = getChatListFromName(chatName);
+
         curChannel.toList = chatToList.split(",");
-        $("#chat-title span").text("[" + curChannel.toList.toString() + "]");
-        $("#status-bar span").text("status: chatting with [" + curChannel.toList.toString() + "]");
+        $("#chat-title span").text(chatName + ":[" + curChannel.toList.toString() + "]");
+        $("#status-bar span").text("status: chatting on "+chatName+" with [" + curChannel.toList.toString() + "]");
     });
 
-    var newChat;
-    /*newChat.toList = curChannel.toList;
+    var newChat = {};
+    newChat.toList = toarray;
+    newChat.name = name;
     newChat.messages = [];
 
-    chatContexts.push(newChat);*/
+    chatContexts.push(newChat);
 }
 
-function loginToProvider(user, pass, domain)
+function getChatListFromName(search)
+{
+    for(var i = 0; i < chatContexts.length; ++i)
+    {
+        if(chatContexts[i].name == search)
+        {
+            return chatContexts[i].toList.toString();
+        }
+    }
+    return "";
+}
+
+function loginToProvider(user, pass, domainIn)
 {
     curUser.user = user;
-    curUser.domain = domain;
+    curUser.domain = domainIn;
     curUser.pass = pass;
 
     var package = {
@@ -256,7 +258,7 @@ function loginToProvider(user, pass, domain)
     $.support.cors = true;
 
     $.ajax({
-        url: "https://" + domain + ":4567/token",
+        url: "https://" + curUser.domain + "/token",
         type: "POST",
         data:package,
         contentType:"application/x-www-form-urlencoded",
