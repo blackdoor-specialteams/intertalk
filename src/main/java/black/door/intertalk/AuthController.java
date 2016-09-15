@@ -30,6 +30,9 @@ public class AuthController {
 	}
 
 	public void checkToken(Request req, Response res) throws AddressException {
+		if(req.requestMethod().equalsIgnoreCase("OPTIONS"))
+			return;
+
 		val tokenOption = Optional.ofNullable(req.headers("Authorization"))
 				.map(authzHeader -> authzHeader.replaceFirst("Bearer ", ""));
 		if(!tokenOption.isPresent()){
