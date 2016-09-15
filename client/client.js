@@ -322,15 +322,16 @@ function submitMessage()
 
         var jPackage = JSON.stringify(package);
 
+        $.support.cors = true;
         $.ajax({
             url: "https://" + curUser.domain + ":4567/messages",
             type: "POST",
             data: jPackage,
-            headers: {
-                Authorization: curUser.token,
-                
-            },
-            contentType:"application/json; charset=utf-8"
+            contentType:"application/json; charset=utf-8",
+            beforeSend: function(xhr) {
+                console.log(curUser.token);
+                xhr.setRequestHeader('Authorization', curUser.token);
+            }
         });
     }
 }
