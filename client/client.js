@@ -282,6 +282,11 @@ function loginToProvider(user, pass, domainIn, portIn)
             messageSocket.onopen = function(event) {
                 messageSocket.send(curUser.token);
             }
+            messageSocket.onclose = function(event) {
+                //we should recconnect here is the ws was dropped by the server
+                //else give an error
+                console.log("websocket closed " + event.data);
+            }
         },
         error: function(data) {
             $("#status-bar span").text("status: login failed");
