@@ -41,7 +41,7 @@ public class MailAddress implements Comparable{
 
 	public static boolean Validate(String addr) {
 		boolean result = true;
-        boolean local = true;
+		boolean local = true;
 		try {
 			InternetAddress email = new InternetAddress(addr);
 			email.validate();
