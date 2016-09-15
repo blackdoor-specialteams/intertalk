@@ -273,7 +273,6 @@ function loginToProvider(user, pass, domain)
                 }
             }
             messageSocket.onopen = function(event) {
-                console.log(curUser.token);
                 messageSocket.send(curUser.token);
             }
         },
