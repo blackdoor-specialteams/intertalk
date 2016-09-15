@@ -147,9 +147,9 @@ function initPage()
         e.preventDefault();
         var fullUsername = $("#connectUser").val();
         var password = $("#connectPass").val();
-        var cDomain = $("#connectProvider").val();
+        var cDomainAndPort = $("#connectProvider").val();
 
-        if(fullUsername == "" || password == "" || cDomain == "")
+        if(fullUsername == "" || password == "" || cDomainAndPort == "")
         {
             $("#connectUser").val("");
             $("#connectPass").val("");
@@ -164,7 +164,11 @@ function initPage()
         $("#connect-button").css("backgroundColor", "#b48c64");
         $("#input-box-connect").css("display", "none");
 
-        loginToProvider(fullUsername, password, cDomain);
+        var indexOfColon = cDomainAndPort.indexOf(":");
+        var cDomain = cDomainAndPort.substring(0, indexOfColon);
+        var portNum = cDomainAndPort.substring(indexOfColon+1);
+
+        loginToProvider(fullUsername, password, cDomain, portNum);
     });
 
     $("#message-text").keydown(function(evt)
@@ -244,11 +248,12 @@ function getChatListFromName(search)
     return "";
 }
 
-function loginToProvider(user, pass, domainIn)
+function loginToProvider(user, pass, domainIn, portIn)
 {
     curUser.user = user;
     curUser.domain = domainIn;
     curUser.pass = pass;
+    curUser.port = portIn;
 
     var package = {
         grant_type: "password",
@@ -258,14 +263,14 @@ function loginToProvider(user, pass, domainIn)
     $.support.cors = true;
 
     $.ajax({
-        url: "https://" + curUser.domain + "/token",
+        url: "https://" + curUser.domain + ":" + curUser.port + "/token",
         type: "POST",
         data:package,
         contentType:"application/x-www-form-urlencoded",
         success:function(data) {
             $("#status-bar span").text("status: logged in. click [new chat] to set chat list");
             curUser.token = data.access_token;
-            var messageSocket = new WebSocket("wss://"+ curUser.domain + "/messageStream");
+            var messageSocket = new WebSocket("wss://"+ curUser.domain + ":" + curUser.port + "/messageStream");
             messageSocket.onmessage= function(event) {
                 try {
                     var decoded = JSON.parse(event.data);
@@ -339,7 +344,7 @@ function submitMessage()
 
         $.support.cors = true;
         $.ajax({
-            url: "https://" + curUser.domain + "/messages",
+            url: "https://" + curUser.domain + ":" + curUser.port + "/messages",
             type: "POST",
             data: jPackage,
             contentType:"application/json; charset=utf-8",
