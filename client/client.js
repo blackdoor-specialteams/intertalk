@@ -230,7 +230,7 @@ function addChat(toarray)
         $(this).css("backgroundColor", "#b48c64");
         $(this).css("color", "#0f0f0f");
         var chatToList = $(this).text();
-        curChannel.toList = chatToList;
+        curChannel.toList = chatToList.split(",");
         $("#chat-title span").text("[" + curChannel.toList.toString() + "]");
         $("#status-bar span").text("status: chatting with [" + curChannel.toList.toString() + "]");
     });
