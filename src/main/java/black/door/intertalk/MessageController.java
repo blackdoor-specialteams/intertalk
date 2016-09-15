@@ -2,6 +2,7 @@ package black.door.intertalk;
 
 import black.door.intertalk.jooq.tables.records.MessagesRecord;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javaslang.collection.HashSet;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import spark.Request;
@@ -57,7 +58,7 @@ public class MessageController {
 		create.executeInsert(record);
 
 
-		SubscriberController.notifyUsers(message.to(), message);
+		SubscriberController.notifyUsers(HashSet.ofAll(message.to()), message);
 
 		/*
 		if(!callerIsProvider){
