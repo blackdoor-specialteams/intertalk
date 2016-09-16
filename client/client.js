@@ -266,6 +266,8 @@ function addChat(name, toarrayIn)
         $("#chat-title span").text(chatName + ":[" + curChannel.toList.toString() + "]");
         $("#status-bar span").text("status: chatting on "+chatName+" with [" + curChannel.toList.toString() + "]");
 
+        console.log(curChannel.messages);
+
         //clear chat context
         $("#chat-window").empty();
         //load history
@@ -370,6 +372,8 @@ function addChatMessage(to, senderFull, msg)
 
 function renderMessage(sender, msg)
 {
+    console.log(sender + ": " + msg);
+
     $('#chat-window').append("<div class='chat-message'><div class='sender-name'>"+"[ "+sender+" ]"+"</div><div class='message'>"+msg+"</div></div>");
 
     $("#chat-window").scrollTop($("#chat-window")[0].scrollHeight);    
