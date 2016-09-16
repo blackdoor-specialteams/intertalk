@@ -269,8 +269,8 @@ function addChat(name, toarrayIn)
         console.log(curChannel.messages);
         for(var i = 0; i < curChannel.messages.length; ++i)
         {
-            var msg = curChannel.messages[i];
-            renderMessage(msg[0], msg[1]);
+            var message = curChannel.messages[i];
+            renderMessage(message.msg, message.sender);
         }
     });
 
