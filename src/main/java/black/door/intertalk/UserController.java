@@ -88,12 +88,10 @@ public class UserController {
 		final Optional<User> userOption;
 
 		if(!(tokenRequestOption.map(r -> r instanceof PasswordTokenRequest).orElse(false))){
-			System.out.println(tokenRequestOption.get());
 			return ImmutableErrorResponse
 					.of(ErrorType.StdErrorType.invalid_request)
 					.toJson();
 		}
-
 
 		val request = (PasswordTokenRequest) tokenRequestOption.get();
 		userOption = create.select()

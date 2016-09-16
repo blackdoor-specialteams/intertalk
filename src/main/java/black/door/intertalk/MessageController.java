@@ -1,6 +1,8 @@
 package black.door.intertalk;
 
+import black.door.intertalk.jooq.Tables;
 import black.door.intertalk.jooq.tables.records.MessagesRecord;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import javaslang.collection.HashSet;
@@ -15,11 +17,15 @@ import spark.Response;
 import javax.mail.internet.AddressException;
 import java.sql.Connection;
 import java.sql.Timestamp;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static black.door.intertalk.AuthController.CALLER_IS_PROVIDER;
 import static black.door.intertalk.AuthController.CLAIMS;
 import static black.door.intertalk.Main.domain;
+import static black.door.intertalk.jooq.Tables.MESSAGES;
 import static java.time.OffsetDateTime.now;
+import static java.util.stream.Collectors.toSet;
 import static spark.Spark.halt;
 
 /**
@@ -37,6 +43,21 @@ public class MessageController {
 		this.mapper = mapper;
 		this.connection = connection;
 		create = DSL.using(connection);
+	}
+
+	@SneakyThrows({AddressException.class, JsonProcessingException.class})
+	public Object listConversations(Request req, Response _){
+		if(req.attribute(CALLER_IS_PROVIDER))
+			halt(403, "why is a provider trying to get conversations?");
+		val caller = new MailAddress(((Claims) req.attribute(CLAIMS)).getSubject(), domain);
+
+		return mapper.writeValueAsString(create
+				.selectDistinct(MESSAGES.TO)
+				.from(MESSAGES)
+				.where(MESSAGES.TO.contains(new String[]{caller.toString()}))
+				.stream()
+				.map(r -> HashSet.of(r.value1()))
+				.collect(toSet()));
 	}
 
 	@SneakyThrows(AddressException.class)

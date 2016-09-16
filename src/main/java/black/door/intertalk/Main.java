@@ -1,6 +1,7 @@
 package black.door.intertalk;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.typesafe.config.Config;
@@ -35,7 +36,8 @@ public class Main {
 	public static final ObjectMapper mapper = new ObjectMapper()
 			.registerModule(new Jdk8Module())
 			.registerModule(new JavaslangModule())
-			.registerModule(new JavaTimeModule());
+			.registerModule(new JavaTimeModule())
+			.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
 	public static void main(String[] args){
 		Logger logger = LoggerFactory.getLogger(black.door.intertalk.Main.class);
@@ -62,12 +64,13 @@ public class Main {
 			secure("keystore.jks", conf.getString("intertalk.keystore.password"), null, null);
 
 		webSocket("/messageStream", SubscriberController.class);
-		before("/messages", (req, res) -> authControllerSupplier.get().checkToken(req, res));
+		authIt(authControllerSupplier, "/messages", "/conversations");
+		get("/conversations", buildMessageController(mapper, hikari, MessageController::listConversations));
 		post("/messages", buildMessageController(mapper, hikari, MessageController::receiveMessage));
 
-		post("/users", buildLoginController(hikari, tokenKey, UserController::createUser));
+		post("/users", buildUserController(hikari, tokenKey, UserController::createUser));
 
-		post("/token", buildLoginController(hikari, tokenKey, UserController::login));
+		post("/token", buildUserController(hikari, tokenKey, UserController::login));
 
 		get("/keys", keyControllerSupplier.get().listKeys);
 		get("/keys/:kid", keyControllerSupplier.get().retrieveKey);
@@ -87,15 +90,20 @@ public class Main {
 			migrate();
 	}
 
+	private static void authIt(Supplier<AuthController>authControllerSupplier, String... paths){
+		for(String path: paths)
+			before(path, (req, res) -> authControllerSupplier.get().checkToken(req, res));
+	}
+
 	private static void migrate(){
 		Flyway f = new Flyway();
 		f.setDataSource(hikari);
 		f.migrate();
 	}
 
-	private static Route buildLoginController(DataSource ds,
-	                                          Key tokenKey,
-	                                          Function3<
+	private static Route buildUserController(DataSource ds,
+	                                         Key tokenKey,
+	                                         Function3<
 			                                          UserController,
 			                                          Request,
 			                                          Response,
