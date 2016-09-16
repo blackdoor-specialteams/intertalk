@@ -229,7 +229,7 @@ function addChat(name, toarray)
     });
 
     var newChat = {};
-    newChat.toList = toarray;
+    newChat.toList = addDomains(toarray);
     newChat.name = name;
     newChat.messages = [];
 
@@ -309,6 +309,7 @@ function addChatMessage(to, senderFull, msg)
     var sender = senderFull.substring(0, indexOfAt);
 
     chatContexts[chatIndex].messages.push({sender, msg});
+    console.log("msg added to " + chatIndex + " queue");
 
     if(chatIndex == curUser.currentChannelIndex)
     {
