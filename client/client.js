@@ -89,13 +89,13 @@ function initPage()
         ////// CREATE CHANNEL
         var toListAsString = $("#newChatUsers").val();
         var channelName = $("#newChatName").val();
-        if(toListAsString != "") curChannel.toList = toListAsString.split(",");
-        curChannel.toList.push(curUser.user + "@" + curUser.domain);
-        curChannel.name = channelName;
-        $("#chat-title span").text(channelName + ":[" + curChannel.toList.toString() + "]");
-        $("#status-bar span").text("status: chatting on "+channelName+" with [" + curChannel.toList.toString() + "]");
+        //if(toListAsString != "") curChannel.toList = toListAsString.split(",");
+        //curChannel.toList.push(curUser.user + "@" + curUser.domain);
+        //curChannel.name = channelName;
+        //$("#chat-title span").text(channelName + ":[" + curChannel.toList.toString() + "]");
+        //$("#status-bar span").text("status: chatting on "+channelName+" with [" + curChannel.toList.toString() + "]");
 
-        addChat(channelName, curChannel.toList);
+        addChat(channelName, toListAsString.split(","));
         ///// END CREATE CHANNEL
         $("#new-chat-button").css("backgroundColor", "#b48c64");
         $("#input-box-new-chat").css("display", "none");
@@ -225,8 +225,10 @@ function getChatIndexFromName(search)
     return -1;
 }
 
-function addChat(name, toarray)
+function addChat(name, toarrayIn)
 {
+    var toarray = toarrayIn.push(curUser.user + "@" + curUser.domain);
+
     $('#chat-tabs').append("<div class='chat-tab'><span>"+ name +"</span></div>");
 
     $("#chat-tabs").scrollTop($("#chat-tabs")[0].scrollHeight);
