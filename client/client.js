@@ -270,7 +270,7 @@ function addChat(name, toarrayIn)
         for(var i = 0; i < curChannel.messages.length; ++i)
         {
             var message = curChannel.messages[i];
-            renderMessage(message.msg, message.sender);
+            renderMessage(message.sender, message.hey);
         }
     });
 
