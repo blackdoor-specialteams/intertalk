@@ -271,7 +271,7 @@ function addChat(name, toarrayIn)
         //load history
         for(var i = 0; i < curChannel.messages.length; ++i)
         {
-            var msg = curChannel.message[i];
+            var msg = curChannel.messages[i];
             renderMessage(msg[0], msg[1]);
         }
     });
