@@ -86,14 +86,8 @@ function initPage()
 
     $("#newChatForm").submit(function(e) {
         e.preventDefault();
-        ////// CREATE CHANNEL
         var toListAsString = $("#newChatUsers").val();
         var channelName = $("#newChatName").val();
-        //if(toListAsString != "") curChannel.toList = toListAsString.split(",");
-        //curChannel.toList.push(curUser.user + "@" + curUser.domain);
-        //curChannel.name = channelName;
-        //$("#chat-title span").text(channelName + ":[" + curChannel.toList.toString() + "]");
-        //$("#status-bar span").text("status: chatting on "+channelName+" with [" + curChannel.toList.toString() + "]");
 
         if(toListAsString != "") addChat(channelName, toListAsString.split(","));
         else addChat(channelName, []);
@@ -200,11 +194,27 @@ function initPage()
     });
 }
 
+function compareArrays(a1, a2)
+{
+    if(a1.length != a2.length) return false;
+
+    for(var i = 0; i < a1.length; ++i)
+    {
+        var testElem1 = a1[i];
+        if(!a2.includes(testElem1)) return false;
+
+        var testElem2 = a2[i];
+        if(!a1.includes(testElem2)) return false;
+    }
+
+    return true;
+}
+
 function getChatContextIndex(toList)
 {
     for(var i = 0; i < chatContexts.length; ++i)
     {
-        if(chatContexts[i].toList == toList)
+        if(compareArrays(toList, chatContexts[i].toList))
         {
             return i;
         }
