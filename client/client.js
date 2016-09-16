@@ -89,7 +89,7 @@ function initPage()
         var toListAsString = $("#newChatUsers").val();
         var channelName = $("#newChatName").val();
 
-        if(toListAsString != "") addChat(channelName, toListAsString.split(","));
+        if(toListAsString != "") addChat(channelName, toListAsString.split(" ").join("").split(","));
         else addChat(channelName, []);
         $("#new-chat-button").css("backgroundColor", "#b48c64");
         $("#input-box-new-chat").css("display", "none");
@@ -219,7 +219,7 @@ function getChatContextIndex(toList)
             return i;
         }
     }
-    return 0;
+    return -1;
 }
 
 function getChatIndexFromName(search)
@@ -354,11 +354,13 @@ function addChatMessage(to, senderFull, msg)
     var indexOfAt = senderFull.indexOf("@");
     var sender = senderFull.substring(0, indexOfAt);
 
-    chatContexts[chatIndex].messages.push({sender, msg});
-
-    if(chatIndex == curChannel.index)
+    if(chatIndex >= 0)
     {
-        renderMessage(sender, msg);
+        if(chatIndex == curChannel.index)
+        {
+            renderMessage(sender, msg);
+        }
+        chatContexts[chatIndex].messages.push({sender, msg});
     }
 }
 
