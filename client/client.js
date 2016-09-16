@@ -269,9 +269,9 @@ function addChat(name, toarrayIn)
         //clear chat context
         $("#chat-window").empty();
         //load history
-        for(var i = 0; i < curChat.messages.length; ++i)
+        for(var i = 0; i < curChannel.messages.length; ++i)
         {
-            var msg = curChat.message[i];
+            var msg = curChannel.message[i];
             renderMessage(msg[0], msg[1]);
         }
     });
