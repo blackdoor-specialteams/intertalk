@@ -245,8 +245,8 @@ function addChat(name, toarray)
 
         //curChannel.toList = chatToList.split(",");
         var chatIndex = getChatIndexFromName(chatName);
-        console.log("Switching to chat #" + chatIndex);
-        console.log(chatContexts[chatIndex]);
+        //console.log("Switching to chat #" + chatIndex);
+        //console.log(chatContexts[chatIndex]);
         
         curChannel = chatContexts[chatIndex];
 
@@ -262,7 +262,7 @@ function addChat(name, toarray)
 
     chatContexts.push(newChat);
 
-    console.log(chatContexts.toString());
+    console.log(chatContexts);
 
     //curUser.currentChannelIndex = chatContexts.length - 1; //set to current, which is this one
     //console.log(curUser.currentChannelIndex);
