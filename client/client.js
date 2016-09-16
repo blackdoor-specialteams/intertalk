@@ -360,14 +360,10 @@ function addChatMessage(to, senderFull, msg)
     var sender = senderFull.substring(0, indexOfAt);
 
     chatContexts[chatIndex].messages.push({sender, msg});
-    console.log("msg added to " + chatIndex + " queue");
-
-    console.log("CUR CHANNEL: " + curChannel.index);
-    console.log("CHAT INDEX: " + chatIndex);
 
     if(chatIndex == curChannel.index)
     {
-        renderMessage(sender, full);
+        renderMessage(sender, msg);
     }
 }
 
