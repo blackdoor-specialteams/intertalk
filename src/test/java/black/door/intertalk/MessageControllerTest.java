@@ -1,5 +1,6 @@
 package black.door.intertalk;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kag0.oauth2.TokenResponse;
 import com.github.kag0.oauth2.password.ImmutablePasswordTokenRequest;
@@ -15,28 +16,41 @@ import org.asynchttpclient.ws.WebSocketUpgradeHandler;
 import org.flywaydb.core.Flyway;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import javax.mail.internet.AddressException;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.OffsetDateTime;
+import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.*;
-import static spark.Spark.stop;
 
 /**
  * Created by nfischer on 9/11/16.
  */
 public class MessageControllerTest {
 
+	int port = 9869;
+
+	@BeforeClass
+	public static void beforeClass(){
+		Main.main(new String[0]);
+	}
+
 	@Before
 	public void setUp() throws Exception {
 
 			Flyway f = new Flyway();
 
-			Main.main(new String[0]);
+			//Main.main(new String[0]);
 			f.setDataSource(Main.hikari);
 			f.clean();
 			f.migrate();
@@ -45,7 +59,7 @@ public class MessageControllerTest {
 
 	@Test
 	public void test() throws UnirestException, IOException, ExecutionException, InterruptedException {
-		Unirest.post("http://localhost:4567/users")
+		Unirest.post("http://localhost:9869/users")
 				.body("{\n" +
 						"  \"username\": \"jim\",\n" +
 						"  \"password\": \"pass\"\n" +
@@ -53,7 +67,7 @@ public class MessageControllerTest {
 				.asString();
 
 		// login
-		HttpResponse<String> loginResponse = Unirest.post("http://localhost:4567/token")
+		HttpResponse<String> loginResponse = Unirest.post("http://localhost:9869/token")
 				.body(ImmutablePasswordTokenRequest.builder().password("pass").username("jim").build().toFormEncoded())
 				.asString();
 
@@ -62,7 +76,7 @@ public class MessageControllerTest {
 		List<Message> messages = new LinkedList<>();
 
 		DefaultAsyncHttpClient c = new DefaultAsyncHttpClient();
-		WebSocket websocket = c.prepareGet("ws://localhost:4567/messageStream")
+		WebSocket websocket = c.prepareGet("ws://localhost:9869/messageStream")
 				.execute(new WebSocketUpgradeHandler.Builder().addWebSocketListener(
 						new WebSocketTextListener() {
 
@@ -95,7 +109,7 @@ public class MessageControllerTest {
 				.sentAt(OffsetDateTime.now())
 				.build();
 
-		HttpResponse<String> messageSendResponse = Unirest.post("http://localhost:4567/messages")
+		HttpResponse<String> messageSendResponse = Unirest.post("http://localhost:9869/messages")
 				.header("Authorization", "Bearer " + tokenResponse.accessToken())
 				.body(Main.mapper.writeValueAsString(m))
 				.asString();
@@ -108,8 +122,63 @@ public class MessageControllerTest {
 		assertTrue(messages.stream().anyMatch(ms -> ms.message().equals(m.message())));
 	}
 
+	@Test
+	public void testMessageHistory() throws SQLException, UnirestException, IOException, AddressException {
+		Unirest.post(String.format("http://localhost:%d/users", port))
+				.body("{\n" +
+						"  \"username\": \"jim\",\n" +
+						"  \"password\": \"pass\"\n" +
+						"}")
+				.asString();
+		Unirest.post(String.format("http://localhost:%d/users", port))
+				.body("{\n" +
+						"  \"username\": \"bob\",\n" +
+						"  \"password\": \"pass\"\n" +
+						"}")
+				.asString();
+
+		HttpResponse<String> loginResponse = Unirest.post(String.format("http://localhost:%d/token", port))
+				.body(ImmutablePasswordTokenRequest.builder().password("pass").username("jim").build().toFormEncoded())
+				.asString();
+
+		MailAddress jim = new MailAddress("jim", "localhost");
+		MailAddress bob = new MailAddress("bob", "localhost");
+
+		TokenResponse tokenResponse = TokenResponse.fromJson(new ObjectMapper().readTree(loginResponse.getBody()));
+		Set<Message> messages = Stream.generate(() -> ImmutableMessage.builder()
+				.from(jim)
+				.to(TreeSet.of(jim, bob))
+				.sentAt(OffsetDateTime.now())
+				.message("hihi" + Math.random())
+				.build()
+		).limit(10).collect(toSet());
+
+		for(Message m : messages){
+			HttpResponse<String> r = Unirest.post(String.format("http://localhost:%d/messages", port))
+					.header("Authorization", tokenResponse.accessToken())
+					.body(Main.mapper.writeValueAsString(m))
+					.asString();
+			assertEquals(201, r.getStatus());
+		}
+
+
+		loginResponse = Unirest.post(String.format("http://localhost:%d/token", port))
+				.body(ImmutablePasswordTokenRequest.builder().password("pass").username("bob").build().toFormEncoded())
+				.asString();
+		TokenResponse tokenResponse2 = TokenResponse.fromJson(new ObjectMapper().readTree(loginResponse.getBody()));
+
+
+		HttpResponse<String> historyResponse = Unirest.get(String.format("http://localhost:%d/messages/%s", port, Base64.getUrlEncoder().encodeToString(Main.mapper.writeValueAsBytes(new MailAddress[]{jim, bob}))))
+				.header("Authorization", tokenResponse2.accessToken())
+				.asString();
+		System.out.println(historyResponse.getBody());
+		Set<Message> parsedMessages = Main.mapper.readValue(historyResponse.getBody(), new TypeReference<Set<Message>>() {});
+
+		messages.forEach(m -> assertTrue(parsedMessages.stream().anyMatch(pm -> pm.message().equals(m.message()))));
+	}
+
 	@After
 	public void tearDown() throws Exception {
-		stop();
+		//stop();
 	}
 }
