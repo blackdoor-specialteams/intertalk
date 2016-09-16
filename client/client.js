@@ -266,7 +266,6 @@ function addChat(name, toarrayIn)
         //clear chat context
         $("#chat-window").empty();
         //load history
-        console.log(curChannel.messages);
         for(var i = 0; i < curChannel.messages.length; ++i)
         {
             var message = curChannel.messages[i];
@@ -325,7 +324,6 @@ function loginToProvider(user, pass, domainIn, portIn)
                 try {
                     var decoded = JSON.parse(event.data);
                     addChatMessage(decoded.to, decoded.from, decoded.message);
-                    console.log(decoded.to); 
                 }
                 catch(err) {
                 }
@@ -351,6 +349,7 @@ function loginToProvider(user, pass, domainIn, portIn)
 function addChatMessage(to, senderFull, msg)
 {
     var chatIndex = getChatContextIndex(to);
+    console.log("message logged to channel " + chatIndex);
 
     var indexOfAt = senderFull.indexOf("@");
     var sender = senderFull.substring(0, indexOfAt);
