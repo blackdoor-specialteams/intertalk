@@ -202,7 +202,7 @@ function initPage()
 
 function getCurrentChatContextIndex(toList)
 {
-
+    return 0;
 }
 
 function addChat(name, toarray)
@@ -234,6 +234,9 @@ function addChat(name, toarray)
     newChat.messages = [];
 
     chatContexts.push(newChat);
+
+    curUser.currentChannelIndex = chatContexts.length - 1; //set to current, which is this one
+    console.log(curUser.currentChannelIndex);
 }
 
 function getChatListFromName(search)
@@ -274,7 +277,8 @@ function loginToProvider(user, pass, domainIn, portIn)
             messageSocket.onmessage= function(event) {
                 try {
                     var decoded = JSON.parse(event.data);
-                    addChatMessage(decoded.from, decoded.message);    
+                    addChatMessage(decoded.to, decoded.from, decoded.message);
+                    console.log(decoded.to); 
                 }
                 catch(err) {
                 }
@@ -283,7 +287,7 @@ function loginToProvider(user, pass, domainIn, portIn)
                 messageSocket.send(curUser.token);
             }
             messageSocket.onclose = function(event) {
-                //we should recconnect here is the ws was dropped by the server
+                //we should reconnect here if the ws was dropped by the server
                 //else give an error
                 console.log("websocket closed (" + event.code + ") " + event.reason);
             }
@@ -297,17 +301,21 @@ function loginToProvider(user, pass, domainIn, portIn)
     });
 }
 
-function addChatMessage(senderFull, msg)
+function addChatMessage(to, senderFull, msg)
 {
-    //save message to context message list
-
+    var chatIndex = getCurrentChatContextIndex(to);
 
     var indexOfAt = senderFull.indexOf("@");
     var sender = senderFull.substring(0, indexOfAt);
 
-    $('#chat-window').append("<div class='chat-message'><div class='sender-name'>"+"[ "+sender+" ]"+"</div><div class='message'>"+msg+"</div></div>");
+    chatContexts[chatIndex].messages.push({sender, msg});
 
-    $("#chat-window").scrollTop($("#chat-window")[0].scrollHeight);
+    if(chatIndex == curUser.currentChannelIndex)
+    {
+        $('#chat-window').append("<div class='chat-message'><div class='sender-name'>"+"[ "+sender+" ]"+"</div><div class='message'>"+msg+"</div></div>");
+
+        $("#chat-window").scrollTop($("#chat-window")[0].scrollHeight);
+    }
 }
 
 function addDomains(toList)
