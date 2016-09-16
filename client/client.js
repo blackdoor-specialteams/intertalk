@@ -227,7 +227,8 @@ function getChatIndexFromName(search)
 
 function addChat(name, toarrayIn)
 {
-    var toarray = toarrayIn.push(curUser.user + "@" + curUser.domain);
+    var toarray = toarrayIn;
+    toarray.push(curUser.user + "@" + curUser.domain);
 
     $('#chat-tabs').append("<div class='chat-tab'><span>"+ name +"</span></div>");
 
