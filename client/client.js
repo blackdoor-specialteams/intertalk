@@ -202,7 +202,19 @@ function initPage()
 
 function getCurrentChatContextIndex(toList)
 {
-    return 0;
+    return curChannel.index;
+}
+
+function getChatIndexFromName(search)
+{
+    for(var i = 0; i < chatContexts.length; ++i)
+    {
+        if(chatContexts[i].name == search)
+        {
+            return i;
+        }
+    }
+    return -1;
 }
 
 function addChat(name, toarray)
@@ -221,9 +233,12 @@ function addChat(name, toarray)
         $(this).css("color", "#0f0f0f");
         
         var chatName = $(this).text();
-        var chatToList = getChatListFromName(chatName);
+        //var chatToList = getChatListFromName(chatName);
 
-        curChannel.toList = chatToList.split(",");
+        //curChannel.toList = chatToList.split(",");
+        var chatIndex = getChatIndexFromName(chatName);
+        curChannel = chatContexts[chatIndex];
+
         $("#chat-title span").text(chatName + ":[" + curChannel.toList.toString() + "]");
         $("#status-bar span").text("status: chatting on "+chatName+" with [" + curChannel.toList.toString() + "]");
     });
@@ -232,11 +247,12 @@ function addChat(name, toarray)
     newChat.toList = addDomains(toarray);
     newChat.name = name;
     newChat.messages = [];
+    newChat.index = chatContexts.length;
 
     chatContexts.push(newChat);
 
-    curUser.currentChannelIndex = chatContexts.length - 1; //set to current, which is this one
-    console.log(curUser.currentChannelIndex);
+    //curUser.currentChannelIndex = chatContexts.length - 1; //set to current, which is this one
+    //console.log(curUser.currentChannelIndex);
 }
 
 function getChatListFromName(search)
@@ -311,7 +327,7 @@ function addChatMessage(to, senderFull, msg)
     chatContexts[chatIndex].messages.push({sender, msg});
     console.log("msg added to " + chatIndex + " queue");
 
-    if(chatIndex == curUser.currentChannelIndex)
+    if(chatIndex == curChannel.index)
     {
         $('#chat-window').append("<div class='chat-message'><div class='sender-name'>"+"[ "+sender+" ]"+"</div><div class='message'>"+msg+"</div></div>");
 
