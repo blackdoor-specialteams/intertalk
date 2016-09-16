@@ -200,9 +200,17 @@ function initPage()
     });
 }
 
-function getCurrentChatContextIndex(toList)
+function getChatContextIndex(toList)
 {
-    return curChannel.index;
+    for(var i = 0; i < chatContexts.length; ++i)
+    {
+        if(chatContexts[i].toList == toList)
+        {
+            return i;
+        }
+    }
+    console.log("oops");
+    return 0;
 }
 
 function getChatIndexFromName(search)
@@ -324,7 +332,7 @@ function loginToProvider(user, pass, domainIn, portIn)
 
 function addChatMessage(to, senderFull, msg)
 {
-    var chatIndex = getCurrentChatContextIndex(to);
+    var chatIndex = getChatContextIndex(to);
 
     var indexOfAt = senderFull.indexOf("@");
     var sender = senderFull.substring(0, indexOfAt);
