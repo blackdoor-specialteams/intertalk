@@ -265,6 +265,15 @@ function addChat(name, toarrayIn)
 
         $("#chat-title span").text(chatName + ":[" + curChannel.toList.toString() + "]");
         $("#status-bar span").text("status: chatting on "+chatName+" with [" + curChannel.toList.toString() + "]");
+
+        //clear chat context
+        $("#chat-window").empty();
+        //load history
+        for(var i = 0; i < curChat.messages.length; ++i)
+        {
+            var msg = curChat.message[i];
+            renderMessage(msg[0], msg[1]);
+        }
     });
 
     var newChat = {};
@@ -355,10 +364,15 @@ function addChatMessage(to, senderFull, msg)
 
     if(chatIndex == curChannel.index)
     {
-        $('#chat-window').append("<div class='chat-message'><div class='sender-name'>"+"[ "+sender+" ]"+"</div><div class='message'>"+msg+"</div></div>");
-
-        $("#chat-window").scrollTop($("#chat-window")[0].scrollHeight);
+        renderMessage(sender, full);
     }
+}
+
+function renderMessage(sender, msg)
+{
+    $('#chat-window').append("<div class='chat-message'><div class='sender-name'>"+"[ "+sender+" ]"+"</div><div class='message'>"+msg+"</div></div>");
+
+    $("#chat-window").scrollTop($("#chat-window")[0].scrollHeight);    
 }
 
 function addDomains(toList)
