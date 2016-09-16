@@ -95,8 +95,8 @@ function initPage()
         //$("#chat-title span").text(channelName + ":[" + curChannel.toList.toString() + "]");
         //$("#status-bar span").text("status: chatting on "+channelName+" with [" + curChannel.toList.toString() + "]");
 
-        addChat(channelName, toListAsString.split(","));
-        ///// END CREATE CHANNEL
+        if(toListAsString != "") addChat(channelName, toListAsString.split(","));
+        else addChat(channelName, []);
         $("#new-chat-button").css("backgroundColor", "#b48c64");
         $("#input-box-new-chat").css("display", "none");
         $("#newChatName").val("");
