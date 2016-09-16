@@ -219,7 +219,6 @@ function getChatContextIndex(toList)
             return i;
         }
     }
-    console.log("oops");
     return 0;
 }
 
@@ -258,8 +257,6 @@ function addChat(name, toarrayIn)
 
         //curChannel.toList = chatToList.split(",");
         var chatIndex = getChatIndexFromName(chatName);
-        //console.log("Switching to chat #" + chatIndex);
-        //console.log(chatContexts[chatIndex]);
         
         curChannel = chatContexts[chatIndex];
 
@@ -269,6 +266,7 @@ function addChat(name, toarrayIn)
         //clear chat context
         $("#chat-window").empty();
         //load history
+        console.log(curChannel.messages);
         for(var i = 0; i < curChannel.messages.length; ++i)
         {
             var msg = curChannel.messages[i];
@@ -283,8 +281,6 @@ function addChat(name, toarrayIn)
     newChat.index = chatContexts.length;
 
     chatContexts.push(newChat);
-
-    console.log(chatContexts);
 
     //curUser.currentChannelIndex = chatContexts.length - 1; //set to current, which is this one
     //console.log(curUser.currentChannelIndex);
@@ -369,8 +365,6 @@ function addChatMessage(to, senderFull, msg)
 
 function renderMessage(sender, msg)
 {
-    console.log(sender + ": " + msg);
-
     $('#chat-window').append("<div class='chat-message'><div class='sender-name'>"+"[ "+sender+" ]"+"</div><div class='message'>"+msg+"</div></div>");
 
     $("#chat-window").scrollTop($("#chat-window")[0].scrollHeight);    
