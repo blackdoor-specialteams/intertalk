@@ -258,6 +258,11 @@
             <artifactId>oauth2</artifactId>
             <version>1.1.3</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.kag0</groupId>
+            <artifactId>ruid</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 
         <dependency>
             <groupId>org.asynchttpclient</groupId>

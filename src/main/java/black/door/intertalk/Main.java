@@ -12,6 +12,8 @@ import javaslang.Function3;
 import javaslang.jackson.datatype.JavaslangModule;
 import lombok.val;
 import org.flywaydb.core.Flyway;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Request;
@@ -21,6 +23,7 @@ import spark.Route;
 import javax.sql.DataSource;
 import java.security.Key;
 import java.sql.Connection;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static spark.Spark.*;
@@ -64,8 +67,13 @@ public class Main {
 			secure("keystore.jks", conf.getString("intertalk.keystore.password"), null, null);
 
 		webSocket("/messageStream", SubscriberController.class);
-		authIt(authControllerSupplier, "/messages", "/conversations");
+		authIt(authControllerSupplier,
+				"/messages"
+				,"/messages/*"
+				,"/conversations"
+		);
 		get("/conversations", buildMessageController(mapper, hikari, MessageController::listConversations));
+		get("/messages/:convo", buildMessageController(mapper, hikari, MessageController::listConversationMessages));
 		post("/messages", buildMessageController(mapper, hikari, MessageController::receiveMessage));
 
 		post("/users", buildUserController(hikari, tokenKey, UserController::createUser));
@@ -126,9 +134,21 @@ public class Main {
 			                                            method){
 		return (req, res) -> {
 			try(Connection connection = hikari.getConnection()){
-				return method.apply(new MessageController(mapper, connection), req, res);
+				return method.apply(new MessageController(mapper, DSL.using(connection, SQLDialect.POSTGRES)), req, res);
 			}
 		};
+	}
+
+	private static <C extends AutoCloseable, R> R autoClosing(C closeable, Function<C, R> fn){
+		try {
+			try(C c  = closeable){
+				return fn.apply(c);
+			}
+		} catch (Exception e) {
+			if(e instanceof RuntimeException)
+				throw (RuntimeException) e;
+			throw new RuntimeException(e);
+		}
 	}
 
 	private static void pool(Config conf){

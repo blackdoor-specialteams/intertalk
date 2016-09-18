@@ -7,12 +7,13 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import org.apache.commons.validator.routines.EmailValidator;
 import javaslang.control.Try;
+import org.apache.commons.validator.routines.EmailValidator;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.io.IOException;
+
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -64,8 +65,8 @@ public class MailAddress implements Comparable{
 
 		MailAddress that = (MailAddress) o;
 
-		if (!local.equalsIgnoreCase(that.local)) return false;
-		return domain.equalsIgnoreCase(that.domain);
+		return local.equalsIgnoreCase(that.local)
+				&& domain.equalsIgnoreCase(that.domain);
 
 	}
 
