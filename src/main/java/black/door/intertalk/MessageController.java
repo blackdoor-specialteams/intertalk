@@ -4,9 +4,9 @@ import black.door.intertalk.jooq.tables.records.MessagesRecord;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.kag0.ruid.RUID;
 import io.jsonwebtoken.Claims;
 import javaslang.collection.HashSet;
-import javaslang.collection.Stream;
 import javaslang.collection.TreeSet;
 import javaslang.control.Try;
 import lombok.SneakyThrows;
@@ -20,9 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.Base64;
-import java.util.Optional;
 
 import static black.door.intertalk.AuthController.CALLER_IS_PROVIDER;
 import static black.door.intertalk.AuthController.CLAIMS;
@@ -98,16 +96,7 @@ public class MessageController {
 						.limit(limit)
 						.stream()
 						.map(r -> r.into(MessagesRecord.class))
-						.map(r -> ImmutableMessage.builder()
-								.to(TreeSet.ofAll(Stream.of(r.getTo()).map(p -> MailAddress.parse(p).get())))
-								.from(MailAddress.parse(r.getFrom()).get())
-								.sentAt(OffsetDateTime.ofInstant(r.getSentAt().toInstant(), ZoneOffset.UTC))
-								.receivedAt(Optional.ofNullable(r.getReceivedAt()).map(Timestamp::toInstant).map(i -> OffsetDateTime.ofInstant(i, ZoneOffset.UTC)))
-								.message(r.getMessage())
-								.messageFormatted(Optional.ofNullable(r.getMessageFormatted()))
-								.format(Optional.ofNullable(r.getFormat()))
-								.build()
-						)
+						.map(Message::fromRecord)
 						.collect(toList()));
 			}),
 			Case(Failure($()), error -> {
@@ -151,15 +140,9 @@ public class MessageController {
 				.withReceivedAt(now());
 
 		// persist message
-
-		MessagesRecord record = new MessagesRecord(); // todo bind record mapper
-		record.setTo(message.to().map(MailAddress::toString).toJavaArray(String.class));
-		record.setFrom(message.from().toString());
-		record.setSentAt(Timestamp.from(message.sentAt().toInstant()));
-		record.setReceivedAt(Timestamp.from(message.receivedAt().get().toInstant()));
-		record.setMessage(message.message());
-		message.messageFormatted().ifPresent(record::setMessageFormatted);
-		message.format().ifPresent(record::setFormat);
+		MessagesRecord record = message.toRecord();
+		if(record.getId() == null)
+			record.setId(RUID.generate().rawBytes());
 
 		create.executeInsert(record);
 

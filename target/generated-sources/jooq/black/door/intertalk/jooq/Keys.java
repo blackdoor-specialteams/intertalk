@@ -13,7 +13,6 @@ import black.door.intertalk.jooq.tables.records.UsersRecord;
 
 import javax.annotation.Generated;
 
-import org.jooq.Identity;
 import org.jooq.UniqueKey;
 import org.jooq.impl.AbstractKeys;
 
@@ -36,7 +35,6 @@ public class Keys {
     // IDENTITY definitions
     // -------------------------------------------------------------------------
 
-    public static final Identity<MessagesRecord, Long> IDENTITY_MESSAGES = Identities0.IDENTITY_MESSAGES;
 
     // -------------------------------------------------------------------------
     // UNIQUE and PRIMARY KEY definitions
@@ -54,10 +52,6 @@ public class Keys {
     // -------------------------------------------------------------------------
     // [#1459] distribute members to avoid static initialisers > 64kb
     // -------------------------------------------------------------------------
-
-    private static class Identities0 extends AbstractKeys {
-        public static Identity<MessagesRecord, Long> IDENTITY_MESSAGES = createIdentity(Messages.MESSAGES, Messages.MESSAGES.ID);
-    }
 
     private static class UniqueKeys0 extends AbstractKeys {
         public static final UniqueKey<MessagesRecord> MESSAGES_PKEY = createUniqueKey(Messages.MESSAGES, "messages_pkey", Messages.MESSAGES.ID);
