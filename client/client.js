@@ -87,7 +87,8 @@ function initPage()
     $("#newChatForm").submit(function(e) {
         e.preventDefault();
         var toListAsString = $("#newChatUsers").val();
-        var channelName = $("#newChatName").val();
+        //var channelName = $("#newChatName").val();
+        var channelName = toListAsString;
 
         if(toListAsString != "") addChat(channelName, toListAsString.split(" ").join("").split(","));
         else addChat(channelName, []);
