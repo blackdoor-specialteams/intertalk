@@ -29,7 +29,8 @@ where the domain part of the address is a provider's domain.
   "sentAt": "2016-09-05T15:45:39Z",
   "message": "Where are you?",
   "messageFormatted": "Where _are_ you?",
-  "format": "text/markdown"
+  "format": "text/markdown",
+  "id": "9uZIuRrbPRl71PiRAmUID9xd"
 }
 ```
 
@@ -65,6 +66,12 @@ or styling which a user client can use to display the message.
 A MIME type for the formatting of `messageFormatted`, such as `text/markdown` or 
 `text/html`. Binary types should have Base 64 encoded values in the `messageFormatted`
 field.
+
+#### `id`
+
+An optionally included universally unique string (a [ruid](https://github.com/kag0/ruid) 
+might be a good choice)to be used as an idempotent id. 
+This is used to prevent double sending, delivery and display of a message.
 
 ### Endpoints
 

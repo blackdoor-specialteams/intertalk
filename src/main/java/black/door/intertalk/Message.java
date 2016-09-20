@@ -15,6 +15,7 @@ import java.util.Optional;
 @JsonSerialize(as = ImmutableMessage.class)
 @JsonDeserialize(as = ImmutableMessage.class)
 public interface Message {
+	//Optional<RUID> id();
 	TreeSet<MailAddress> to();
 	MailAddress from();
 	OffsetDateTime sentAt();
