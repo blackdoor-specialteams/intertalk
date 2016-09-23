@@ -28,9 +28,14 @@ public class MailAddress implements Comparable{
 	public MailAddress(String local, String domain) throws AddressException {
 		this.local = requireNonNull(local).toLowerCase();
 		this.domain = requireNonNull(domain).toLowerCase();
+		// Create address string
 		String addr = local + '@' + domain;
+		// Check if address is valid, and if so create the new InternetAddress
 		if(Validate(addr)) {
 			new InternetAddress(local + '@' + domain, true);
+		}
+		else {
+			throw new AddressException();
 		}
 	}
 
@@ -40,6 +45,8 @@ public class MailAddress implements Comparable{
 		return Try.of(() -> new MailAddress(addr.substring(0, index), addr.substring(index+1, addr.length())));
 	}
 
+	// Check if given address (string value) is a valid email address
+	// Uses Apache Commons email validator + javax mail validator (Apache commons is more complete)
 	public static boolean Validate(String addr) {
 		boolean result = true;
 		boolean local = true;
