@@ -380,14 +380,14 @@ function addChatMessage(to, senderFull, msg)
     }
 
     //move the chat to the top of the list
-    var chat = chatContexts[chatIndex];
+    /*var chat = chatContexts[chatIndex];
 
     chatContexts.splice(chatIndex, 1);
     chatContexts.unshift(chat);
 
     //move the div to the top
     var chatDiv = $('#chat-tabs').children().splice(chatIndex, 1).detach();
-    $('#chat-tabs').prepend(chatDiv);
+    $('#chat-tabs').prepend(chatDiv);*/
 }
 
 function renderMessage(sender, msg)
