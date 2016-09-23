@@ -349,8 +349,14 @@ function loginToProvider(user, pass, domainIn, portIn)
 
 function addChatMessage(to, senderFull, msg)
 {
+    //parse out msg, remove bad shit
+    //add markdown
+    //issue #13
+
+    //if to is a new list, open that chat
+    //issue #9
+
     var chatIndex = getChatContextIndex(to);
-    console.log("message logged to channel " + chatIndex);
 
     var indexOfAt = senderFull.indexOf("@");
     var sender = senderFull.substring(0, indexOfAt);
@@ -362,6 +368,12 @@ function addChatMessage(to, senderFull, msg)
             renderMessage(sender, msg);
         }
         chatContexts[chatIndex].messages.push({sender, msg});
+    }
+    else
+    {
+        //open a new chat
+        var channelName = to;
+        if(to != "") addChat(channelName, to.split(" ").join("").split(","));
     }
 }
 
