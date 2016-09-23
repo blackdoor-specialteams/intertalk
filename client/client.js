@@ -356,6 +356,9 @@ function addChatMessage(to, senderFull, msg)
     //if to is a new list, open that chat
     //issue #9
 
+    //move chat list to top if new message comes in
+    //issue #15
+
     var chatIndex = getChatContextIndex(to);
 
     var indexOfAt = senderFull.indexOf("@");
@@ -375,6 +378,16 @@ function addChatMessage(to, senderFull, msg)
         var channelName = to;
         if(to != "") addChat(channelName, to.split(" ").join("").split(","));
     }
+
+    //move the chat to the top of the list
+    var chat = chatContexts[chatIndex];
+
+    chatContexts.splice(chatIndex, 1);
+    chatContexts.unshift(chat);
+
+    //move the div to the top
+    var chatDiv = $('#chat-tabs').children().splice(chatIndex, 1).detach();
+    $('#chat-tabs').prepend(chatDiv);
 }
 
 function renderMessage(sender, msg)
