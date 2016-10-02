@@ -1,6 +1,6 @@
 CREATE TABLE messages (
-	id                  BIGSERIAL   PRIMARY KEY,
-	"to"                VARCHAR[]     NOT NULL,
+	id                  bytea       PRIMARY KEY,
+	"to"                VARCHAR[]   NOT NULL,
 	"from"              VARCHAR     NOT NULL,
 	sent_at             TIMESTAMPTZ NOT NULL,
 	received_at         TIMESTAMPTZ NOT NULL,

@@ -15,7 +15,6 @@ import java.util.List;
 import javax.annotation.Generated;
 
 import org.jooq.Field;
-import org.jooq.Identity;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -36,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Messages extends TableImpl<MessagesRecord> {
 
-    private static final long serialVersionUID = -242875409;
+    private static final long serialVersionUID = -1957071273;
 
     /**
      * The reference instance of <code>public.messages</code>
@@ -54,7 +53,7 @@ public class Messages extends TableImpl<MessagesRecord> {
     /**
      * The column <code>public.messages.id</code>.
      */
-    public final TableField<MessagesRecord, Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('messages_id_seq'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
+    public final TableField<MessagesRecord, byte[]> ID = createField("id", org.jooq.impl.SQLDataType.BLOB.nullable(false), this, "");
 
     /**
      * The column <code>public.messages.to</code>.
@@ -119,14 +118,6 @@ public class Messages extends TableImpl<MessagesRecord> {
     @Override
     public Schema getSchema() {
         return Public.PUBLIC;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Identity<MessagesRecord, Long> getIdentity() {
-        return Keys.IDENTITY_MESSAGES;
     }
 
     /**
