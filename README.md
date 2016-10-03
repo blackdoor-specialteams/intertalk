@@ -1,6 +1,6 @@
 # intertalk
 
-[![Docker Automated build](https://img.shields.io/docker/automated/blackdoor/intertalk.svg?maxAge=2592000)](https://hub.docker.com/r/blackdoor/intertalk/)
+[![Docker Automated build](https://img.shields.io/docker/automated/blackdoor/intertalk.svg?maxAge=2592000)](https://hub.docker.com/r/blackdoor/intertalk/) [![](https://images.microbadger.com/badges/image/blackdoor/intertalk.svg)](https://microbadger.com/images/blackdoor/intertalk "Get your own image badge on microbadger.com")
 
 A simple standard for allowing users of different messaging services to talk to 
 one another while still allowing the service providers to offer rich features and 
@@ -159,3 +159,4 @@ Send messages with `POST` to `/messages`. The body should be a message object li
 ### Recieving Messages
 
 Establish a websocket connection to `/messageStream`. As soon as you connect send the token from the login. New messages in the conversation will be sent to you as they arrive. All messages will come over this socket (including ones you send).
+ 
