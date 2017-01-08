@@ -8,7 +8,7 @@ clients the way they want.
 
 ## Standard
 
-### Namespace
+### Terminology
 
 #### Providers
 
@@ -19,6 +19,10 @@ should have a TLS certificate for this domain.
 
 Users are identified by a standard internet mail address (`<local part>@<domain part>`) 
 where the domain part of the address is a provider's domain.
+
+#### Rooms
+
+Unlike direct messages between a fixed set of users, rooms are persistant conversations that users can join or leave. User joining rooms may be able to see the conversation before they joined. Rooms are identified like `<room name>#<domain>` (as such it is forbidden for a room name to contain a `#`). 
 
 ### Message Format
 
@@ -70,8 +74,12 @@ field.
 #### `id`
 
 An optionally included universally unique string (a [ruid](https://github.com/kag0/ruid) 
-might be a good choice)to be used as an idempotent id. 
-This is used to prevent double sending, delivery and display of a message.
+might be a good choice) to be used as an idempotent id. 
+This is used to prevent double sending, delivery, and display of a message.
+
+#### `room`
+
+The above message format is for direct messages. When a message is intended for a room rather than a set of users there are some slight changes. In a room message, the `to` field is absent, and a `room` field is required. The `room` field specifies which room this message was meant to be sent to. All other fields are the same.
 
 ### Endpoints
 
@@ -80,21 +88,26 @@ be reachable from the providers identifying domain).
 
 #### `POST /messages`
 
-The endpoint where other providers will send new messages.
+The endpoint where other providers will send messages destined for users.
+
+#### `POST /rooms/messages` _should use the room name? like /rooms{/roomName}/messages or something?_
+
+The endpoint where other providers will send room messages (where the sending provider is one who hosts a room's member, and the recieving provider hosts the room itself).
 
 #### `GET /keys`
 
 An endpoint which returns a [JWK set](https://tools.ietf.org/html/rfc7517#section-5) 
 of all valid keys for this provider.
 
-#### `GET /keys{/kid}`
-
-An endpoint which returns a JWK with matching `kid` field if the provider has such a key,
-otherwise 404.
-
 ### Sending messages between providers
 
-Send messages to the `/messages` endpoint of the recieving provider. Only send one message per recieving provider (regardless of how many recipeients the conversation has). So in a conversation `["alice@ecorp.com", "bob@chat.allsafe.io", "jane@ecorp.com"]`, when bob sends a message, the `chat.allsafe.io` provider should only send one message to `ecorp.com`.
+Send messages to the `/messages` endpoint of the recieving provider. Only send one message per recieving provider (regardless of how many recipeients the conversation has). So in a conversation `["alice@ecorp.com", "bob@chat.allsafe.io", "jane@ecorp.com"]`, when bob sends a message, the `chat.allsafe.io` provider should only make one call to `ecorp.com`.
+
+### Room behavior
+
+#### Messages 
+
+Sending messages with rooms is a two-step process. When a provider (let's say `chat.allsafe.io`) identifies that one of their users (let's say `bob@chat.allsafe.io`) wants to send a message to a room (let's say `execs#ecorp.com`), then `chat.allsafe.io` composes and signs a room message, and sends it to `ecorp.com/roomMessages`. This is step one. `ecorp.com` then looks up all members of `execs#ecorp.com` (which it is responsible for maintaining) and sends messages to the providers for each of those members. This is step two, member's providers can now notify users that there is a new message in the room.
 
 ### Authentication
 
@@ -131,11 +144,10 @@ jwt fields like `exp`, `nbf`, `iat`, and `jti`. Receiving providers must verify
 that their domain is the one listed in `aud`, that `iss` matches the domain of `sub`,
 and that `sub` matches the `from` field in the message. Receiving providers must 
 also confirm the signing key on the JWT. This is done by placing a `GET` request to 
-`{iss}{/kid}` where `iss` is the `iss` field from the JWT claim, and `kid` is the 
-`kid` field from the JWT header. If a key is returned, and it is valid for the 
-signature on the JWT then the request is authenticated. If the request to `{iss}{/kid}`
+`{iss}{/keys}` where `iss` is the `iss` field from the JWT claim. If the returned JKS contains a valid key for the 
+signature on the JWT then the request is authenticated. If the request to `{iss}{/keys}`
 is not done over authenticated HTTPS, the recieving provider SHOULD notify the 
-user when displaying the message to them.
+user when displaying the message to them (the recieving provider MAY choose not to accept the message at all).
 
 ## Reference Implementation
 
