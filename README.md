@@ -20,6 +20,14 @@ should have a TLS certificate for this domain.
 Users are identified by a standard internet mail address (`<local part>@<domain part>`) 
 where the domain part of the address is a provider's domain.
 
+#### Endpoint
+
+We use "endpoint" to mean a URI with a path (which may have have parameter segments) optionally followed by query parameters. Endpoints in this document are specified using [URI Templates](https://tools.ietf.org/html/rfc6570).
+
+#### Route
+
+We use "route" to refer to an endpoint paired with an HTTP method.
+
 #### Rooms
 
 Unlike direct messages between a fixed set of users, rooms are persistant conversations that users can join or leave. User joining rooms may be able to see the conversation before they joined. Rooms are identified like `<room name>#<domain>` (as such it is forbidden for a room name to contain a `#`). 
@@ -81,26 +89,30 @@ This is used to prevent double sending, delivery, and display of a message.
 
 The above message format is for direct messages. When a message is intended for a room rather than a set of users there are some slight changes. In a room message, the `to` field is absent, and a `room` field is required. The `room` field specifies which room this message was meant to be sent to. All other fields are the same.
 
-### Endpoints
+### Routes
 
-To support intertalk, a provider needs to support only 3 endpoints (which must 
-be reachable from the providers identifying domain).
+To support intertalk, a provider needs to support only 3 routes (which must 
+be reachable from the providers identifying domain). _todo_
 
 #### `POST /messages`
 
-The endpoint where other providers will send messages destined for users.
+The route where other providers will send messages destined for users.
 
 #### `POST /roomMessages`
 
-Endpoint where room provider will post new room messages to room members (where calling provider is a room's host, and the recieving provider hosts one of the room's members).
+route where room provider will post new room messages to room members (where calling provider is a room's host, and the recieving provider hosts one of the room's members).
+
+#### `GET /rooms`
+
+List public rooms on the provider. This is an optional route, so providers MAY opt to return a 404 when this route is called. _todo determine what a room info object looks like_
 
 #### `POST /rooms{/roomName}/messages`
 
-The endpoint where providers will send room messages (where the calling provider is one who hosts a room's member, and the recieving provider hosts the room itself).
+The route where providers will send room messages (where the calling provider is one who hosts a room's member, and the recieving provider hosts the room itself).
 
 #### `GET /rooms{/roomName}/messages{?since,limit}`
 
-The endpoint where a room's message history can be retrieved. `since` is an epoch timestamp and `limit` is the maximum number of messages to be returned. The return object is a json array of JWS. Only a room's host provider need have this endpoint.
+The route where a room's message history can be retrieved. `since` is an epoch timestamp and `limit` is the maximum number of messages to be returned. The return object is a json array of JWS. Only a room's host provider need have this route.
 
 #### `PUT /rooms{/roomName}/members{/user}`
 
@@ -108,12 +120,12 @@ Add a user to a room. The provider recieving this is the host of the room.
 
 #### `GET /keys`
 
-An endpoint which returns a [JWK set](https://tools.ietf.org/html/rfc7517#section-5) 
+An route which returns a [JWK set](https://tools.ietf.org/html/rfc7517#section-5) 
 of all valid keys for this provider.
 
 ### Sending messages between providers
 
-Send messages to the `/messages` endpoint of the recieving provider. Only send one message per recieving provider (regardless of how many recipeients the conversation has). So in a conversation `["alice@ecorp.com", "bob@chat.allsafe.io", "jane@ecorp.com"]`, when bob sends a message, the `chat.allsafe.io` provider should only make one call to `ecorp.com`.
+Send messages to the `/messages` route of the recieving provider. Only send one message per recieving provider (regardless of how many recipeients the conversation has). So in a conversation `["alice@ecorp.com", "bob@chat.allsafe.io", "jane@ecorp.com"]`, when bob sends a message, the `chat.allsafe.io` provider should only make one call to `ecorp.com`.
 
 ### Room behavior
 
