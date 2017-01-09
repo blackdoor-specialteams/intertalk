@@ -90,9 +90,21 @@ be reachable from the providers identifying domain).
 
 The endpoint where other providers will send messages destined for users.
 
-#### `POST /rooms/messages` _should use the room name? like /rooms{/roomName}/messages or something?_
+#### `POST /roomMessages`
 
-The endpoint where other providers will send room messages (where the sending provider is one who hosts a room's member, and the recieving provider hosts the room itself).
+Endpoint where room provider will post new room messages to room members (where calling provider is a room's host, and the recieving provider hosts one of the room's members).
+
+#### `POST /rooms{/roomName}/messages`
+
+The endpoint where providers will send room messages (where the calling provider is one who hosts a room's member, and the recieving provider hosts the room itself).
+
+#### `GET /rooms{/roomName}/messages{?since,limit}`
+
+The endpoint where a room's message history can be retrieved. `since` is an epoch timestamp and `limit` is the maximum number of messages to be returned. The return object is a json array of JWS. Only a room's host provider need have this endpoint.
+
+#### `PUT /rooms{/roomName}/members{/user}`
+
+Add a user to a room. The provider recieving this is the host of the room.
 
 #### `GET /keys`
 
@@ -105,9 +117,66 @@ Send messages to the `/messages` endpoint of the recieving provider. Only send o
 
 ### Room behavior
 
+#### Joining and leaving rooms
+
+To join a room, a user should direct their provider to call `PUT /rooms{/roomName}/members{/user}`. The room provider MAY require some additional data to be passed in the request body.  
+The calling provider MUST include an authorization token in the request headers. The recieving provider must verify that the `sub` on the token matches `user` and that `user` should be allowed to join `roomName`. 
+
+Leaving a room is the same as joining, but uses the `DELETE` method rather than `PUT`.
+
+##### Room referal URI
+
+To make it easier for users to direct their provider to add them to a room, here's a standard room referal. Room referals take the shape `{&room,code}` where room is the room to be joined, and code is an optional referal code which will be passed in the body when the call is made for a user to join a room. For example, if `ecorp.com` allows creation of single-use invites for rooms, then a member of `execs#ecorp.com` might give `room=execs%23ecorp.com&code=f33ead55-bc29-4bfc-b44c-763de84d1da2` to `bob@chat.allsafe.io`. `bob@chat.allsafe.io` woudld then give that referal to `chat.allsafe.io`, which would call `ecorp.com` to add him to the room.
+
 #### Messages 
 
-Sending messages with rooms is a two-step process. When a provider (let's say `chat.allsafe.io`) identifies that one of their users (let's say `bob@chat.allsafe.io`) wants to send a message to a room (let's say `execs#ecorp.com`), then `chat.allsafe.io` composes and signs a room message, and sends it to `ecorp.com/roomMessages`. This is step one. `ecorp.com` then looks up all members of `execs#ecorp.com` (which it is responsible for maintaining) and sends messages to the providers for each of those members. This is step two, member's providers can now notify users that there is a new message in the room.
+Sending messages with rooms is a two-step process. When a provider (let's say `chat.allsafe.io`) identifies that one of their users (let's say `bob@chat.allsafe.io`) wants to send a message to a room (let's say `execs#ecorp.com`), then `chat.allsafe.io` composes and signs a room message, and sends it to `ecorp.com/rooms/execs/messages`. This is step one. `ecorp.com` then looks up all members of `execs#ecorp.com` (which it is responsible for maintaining) and sends messages to the providers for each of those members. For example, if `maskman@chat.fsociety.net` was a member of `execs#ecorp.com`, then `ecorp.com` would post a message to `chat.fsociety.net/roomMessages`. This is step two, member's providers can now notify users that there is a new message in the room.
+
+##### Member provider to room provider message
+
+Member provider (`chat.allsafe.io`) composes a room message like this 
+
+```json
+{
+  "room": "execs#ecorp.com",
+  "from": "bob@chat.allsafe.io",
+  "sentAt": "2016-09-05T15:45:39Z",
+  "message": "What do you want?",
+  "messageFormatted": "What _do_ you want?",
+  "format": "text/markdown",
+  "id": "9uZIuRrbPRl71PiRAmUID9xd"
+}
+```
+
+and signs it using one of the keys available at `chat.allsafe.io/keys` to create a JWS.  
+`chat.allsafe.io` posts the the JWS in the body of a HTTP request to `ecorp.com/rooms/execs/messages` (the caller need not provide an authorization header here).  
+`ecorp.com` verifies that the signature on the JWS is valid, that the key belongs to `chat.allsafe.io`, and that `bob@chat.allsafe.io` is a member of `execs#ecorp.com`. If everything checks out, `ecorp.com` accepts the message.
+
+##### Room provider to member provider
+
+Room provider (`ecorp.com`) has an accepted but unsent message for a given room (`execs#ecorp.com`). `ecorp.com` looks up all members of `execs#ecorp.com` (let's say `bob@chat.allsafe.io`, `alice@ecorp.com`, `angela@chat.allsafe.io`, and `maskman@chat.fsociety.net`) and composes messages to each member's providers like so:
+
+```json
+{
+  "to": ["bob@chat.allsafe.io", "angela@chat.allsafe.io"],
+  "message": "eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+}
+```
+
+```json
+{
+  "to": ["maskman@chat.fsociety.net"],
+  "message": "eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+}
+```
+
+`ecorp.com` posts the first message to `chat.allsafe.io/roomMessages`, and posts the second message to `chat.fsociety.net/roomMessages`. `ecorp.com` must send a token for each of these messages as specified in Authentication > Client Authentication.  
+The receiving providers must verify the token and the JWS in `message`. If everything checks out, the member's provider accepts the message.
+
+###### note: 
+* one message is sent for both `bob@chat.allsafe.io` and `angela@chat.allsafe.io`
+* no message need be sent for `alice@ecorp.com`, since that user is on the same provider as the room
+* providers MAY want to have some ignore functionaliy for rooms, in case a user no longer wishes to see messages from a misbehaving room provider.
 
 ### Authentication
 
