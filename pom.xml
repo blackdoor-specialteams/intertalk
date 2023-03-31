@@ -155,7 +155,7 @@
     </repositories>
 
     <properties>
-        <jacksonVersion>2.8.1</jacksonVersion>
+        <jacksonVersion>2.12.7.1</jacksonVersion>
     </properties>
 
     <dependencies>
